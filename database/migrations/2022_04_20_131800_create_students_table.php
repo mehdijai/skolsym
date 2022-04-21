@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone');
-            $table->integer('ages')->unsigned()->nullable()->default(18);
+            $table->integer('age')->unsigned()->nullable()->default(18);
             $table->string('grade', 100)->nullable();
-            $table->string('state')->nullable()->default('active');
+            $table->string('state')->default('active');
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();
             $table->timestamps();

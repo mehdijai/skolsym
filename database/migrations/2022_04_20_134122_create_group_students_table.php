@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('group_students', function (Blueprint $table) {
+        Schema::create('group_student', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('std_id')->references('id')->on('students');
-            $table->foreignId('g_id')->references('id')->on('groups');
+            $table->foreignId('student_id')->references('id')->on('students');
+            $table->foreignId('group_id')->references('id')->on('groups');
             $table->string('certificate')->nullable();
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('group_students');
+        Schema::dropIfExists('group_student');
     }
 };

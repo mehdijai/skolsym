@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('std_id')->references('id')->on('students');
+            $table->foreignId('student_id')->references('id')->on('students');
             $table->foreignId('course_id')->references('id')->on('courses');
             $table->float('amount_payed');
-            $table->string('state')->nullable()->default('pending');
+            $table->string('state')->default('pending');
             $table->dateTime('paid_at')->nullable();
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->string('title');
+            $table->string('state')->default('active');;
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();
             $table->timestamps();

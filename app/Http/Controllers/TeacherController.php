@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enum\StatesEnum;
+use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Teacher;
 use DateTime;
@@ -12,25 +12,56 @@ use Illuminate\Validation\Rule;
 
 class TeacherController extends Controller
 {
-    public function get_teachers($archived = false)
+    public function get_teachers()
     {
-        $teachers = Teacher::where('archived', $archived)->get();
+        $query = Teacher::query()->where('state', 'active');
+
+        if (request('archived')) {
+            $query->where('archived', true);
+        } else {
+            $query->where('archived', false);
+        }
+
+        if (request('notActive')) {
+            $query->orWhere('state', '!=', 'active');
+        }
+
+        if (request('courses')) {
+            $query->with('courses');
+        }
+
+        $teachers = $query->get();
+
         return response()->json($teachers, 200);
     }
 
     public function get_teacher($id)
     {
-        return response()->json(Teacher::find($id), 200);
+        $query = Teacher::query();
+
+        if (request('courses')) {
+            $query->with('courses');
+        }
+
+        $teacher = $query->find($id);
+
+        return response()->json($teacher, 200);
     }
 
     public function store(Request $request)
     {
 
-        $validated = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'name' => 'required|max:50|min:4',
             'email' => 'required|email|unique:teachers',
             'phone' => 'required|string',
-        ])->validated();
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 401);
+        }
+
+        $validated = $validator->validated();
 
         $teacher = Teacher::create($validated);
         return response()->json($teacher, 200);
@@ -44,12 +75,12 @@ class TeacherController extends Controller
             'name' => 'required|max:50|min:4',
             'email' => 'required|email',
             'phone' => 'required|string',
-            'state' => ['nullable', Rule::in(['active', 'removed'])],
-            'archived' => 'boolean',
+            'state' => ['sometimes', 'nullable', Rule::in(StateLists::TEACHER)],
+            'archived' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 500);
+            return response()->json($validator->errors(), 401);
         }
 
         $validated = $validator->validated();
@@ -60,18 +91,21 @@ class TeacherController extends Controller
         $teacher->email = $validated["email"];
         $teacher->phone = $validated["phone"];
 
-        if ($validated["state"]) {
+        if (array_key_exists('state', $validated)) {
             $teacher->state = $validated["state"];
         }
 
-        if ((bool)$validated["archived"] == true && $teacher->archived == false) {
-            $teacher->archived = true;
-            $teacher->archived_at = new DateTime();
-        }
+        if (array_key_exists('archived', $validated)) {
 
-        if ((bool)$validated["archived"] == false && $teacher->archived == true) {
-            $teacher->archived = false;
-            $teacher->archived_at = null;
+            if ((bool) $validated["archived"] == true && $teacher->archived == false) {
+                $teacher->archived = true;
+                $teacher->archived_at = new DateTime();
+            }
+
+            if ((bool) $validated["archived"] == false && $teacher->archived == true) {
+                $teacher->archived = false;
+                $teacher->archived_at = null;
+            }
         }
 
         $teacher->save();
@@ -83,14 +117,16 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
             'id' => 'required|numeric',
-            'assign_to' => 'numeric|exists:teachers,id',
+            'assign_to' => 'sometimes|numeric|exists:teachers,id',
         ]);
 
         $teacher = Teacher::find($validated['id']);
 
-        $teacher->state = StatesEnum::REMOVED;
+        $teacher->state = "removed";
+        $teacher->archived = true;
+        $teacher->archived_at = new DateTime();
 
-        if ($validated['assign_to'] != null) {
+        if (array_key_exists('assign_to', $validated) && $validated['assign_to'] != null) {
             Course::where('teacher_id', $request['id'])->update(['teacher_id' => $validated['assign_to']]);
         } else {
             $cc = new CourseController();
@@ -100,5 +136,7 @@ class TeacherController extends Controller
         }
 
         $teacher->save();
+
+        return response()->json(['message' => 'teacher deleted'], 200);
     }
 }

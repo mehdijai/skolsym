@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Group;
+use App\Models\GroupStudent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Students extends Model
+class Student extends Model
 {
     use HasFactory;
+
+    protected $table = "students";
 
     protected $fillable = [
         'name',
@@ -22,12 +26,12 @@ class Students extends Model
     ];
 
     /**
-     * The roles that belong to the Students
+     * The roles that belong to the Student
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Groups::class, GroupStudents::class, 'std_id', 'g_id');
+        return $this->belongsToMany(Group::class)->using(GroupStudent::class)->withPivot('certificate');
     }
 }
