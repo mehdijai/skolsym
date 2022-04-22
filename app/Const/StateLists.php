@@ -13,12 +13,14 @@ class StateLists
     ];
 
     /**
+     * @param PENDING course not started yet.
      * @param ACTIVE course is in an active state.
      * @param REMOVED course has been removed by moderator.
      * @param FINISHED course has finished it's period.
      * @param  HOLD teacher has been removed, but course hasn't been assigned to other teacher.
      */
     public const COURSE = [
+        'PENDING' => 'pending',
         'ACTIVE' => 'active',
         'REMOVED' => 'removed',
         'FINISHED' => 'finished',
