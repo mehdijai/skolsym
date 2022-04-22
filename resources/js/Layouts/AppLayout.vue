@@ -13,6 +13,37 @@ defineProps({
     title: String,
 });
 
+const navRoutes = [
+    {
+        name: "Dashboard",
+        route: "dashboard"
+    },
+    {
+        name: "Teachers",
+        route: "teachers.index"
+    },
+    {
+        name: "Courses",
+        route: "courses.index"
+    },
+    {
+        name: "Groups",
+        route: "groups.index"
+    },
+    {
+        name: "Students",
+        route: "students.index"
+    },
+    {
+        name: "Payments",
+        route: "payments.index"
+    },
+    {
+        name: "Accounting",
+        route: "accounting.index"
+    },
+]
+
 const showingNavigationDropdown = ref(false);
 
 const switchToTeam = (team) => {
@@ -49,9 +80,11 @@ const logout = () => {
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <JetNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
-                                </JetNavLink>
+                                <template v-for="(link, index) in navRoutes" :key="index">
+                                    <JetNavLink :href="route(link.route)" :active="route().current(link.route)">
+                                        {{link.name}}
+                                    </JetNavLink>
+                                </template>
                             </div>
                         </div>
 
@@ -208,9 +241,11 @@ const logout = () => {
                 <!-- Responsive Navigation Menu -->
                 <div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="sm:hidden">
                     <div class="pt-2 pb-3 space-y-1">
-                        <JetResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </JetResponsiveNavLink>
+                        <template v-for="(link, index) in navRoutes" :key="index">
+                            <JetResponsiveNavLink :href="route(link.route)" :active="route().current(link.route)">
+                                {{link.name}}
+                            </JetResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -309,3 +344,4 @@ const logout = () => {
         </div>
     </div>
 </template>
+
