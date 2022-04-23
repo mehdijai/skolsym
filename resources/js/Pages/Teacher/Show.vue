@@ -22,6 +22,11 @@ defineProps({
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="sym-container">
+          <div class="py-8 flex flex-row mb-1 sm:mb-0 justify-between w-full">
+            <Link class="text-sky-800 hover:text-sky-600 font-bold text-2xl leading-tight" :href="route('teachers.create')"
+              >Create new teacher</Link
+            >
+          </div>
           <table>
             <thead>
               <tr>

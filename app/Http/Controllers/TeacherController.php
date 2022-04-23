@@ -15,8 +15,14 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Teachers', [
+        return Inertia::render('Teacher/Show', [
             'teachers' => Teacher::all(),
+        ]);
+    }
+    public function create()
+    {
+        return Inertia::render('Teacher/Create', [
+            'states' => StateLists::TEACHER,
         ]);
     }
     public function get_teachers()
@@ -62,16 +68,12 @@ class TeacherController extends Controller
             'name' => 'required|max:50|min:4',
             'email' => 'required|email|unique:teachers',
             'phone' => 'required|string',
+            'state' => ['required', Rule::in(StateLists::TEACHER)],
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
+        Teacher::create($validator->validated());
 
-        $validated = $validator->validated();
-
-        $teacher = Teacher::create($validated);
-        return response()->json($teacher, 200);
+        return redirect()->route('teachers.index');
     }
 
     public function edit(Request $request)

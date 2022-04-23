@@ -35,7 +35,11 @@ Route::middleware([
     })->name('dashboard');
 
     // Teacher Routes
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+    Route::name('teachers.')->prefix('teachers')->group(function () {
+        Route::get('/', [TeacherController::class, 'index'])->name('index');
+        Route::get('/create', [TeacherController::class, 'create'])->name('create');
+        Route::post('/store', [TeacherController::class, 'store'])->name('store');
+    });
 
     // Course Routes
     Route::get('/courses', function () {
