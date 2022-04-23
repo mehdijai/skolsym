@@ -35,9 +35,7 @@ Route::middleware([
     })->name('dashboard');
 
     // Teacher Routes
-    Route::get('/teachers', function () {
-        return Inertia::render('Teachers');
-    })->name('teachers.index');
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
 
     // Course Routes
     Route::get('/courses', function () {

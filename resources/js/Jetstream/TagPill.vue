@@ -1,21 +1,12 @@
 <script setup>
 defineProps({
-  content: String,
-  color: String,
+  value: String,
 });
 </script>
 
 <template>
-  <span
-    class="relative inline-block px-3 py-1 font-semibold leading-tight"
-    :class="`text-${color}-900`"
-  >
-    <span
-      aria-hidden="true"
-      class="absolute inset-0 opacity-50 rounded-full"
-      :class="`bg-${color}-200`"
-    >
-    </span>
-    <span class="relative"> {{ content }} </span>
+  <span class="tag-pill" :class="value">
+    <span aria-hidden="true" class="tag-pill__bg"> </span>
+    <span class="tag-pill__content"> {{ value }} </span>
   </span>
 </template>

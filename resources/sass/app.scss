@@ -1,0 +1,14 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "./componets/table", "./componets/tag-pill",
+    "./componets/drop-down-list";
+
+.material-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &.text-xs{
+        font-size: 1.3rem;
+    }
+}

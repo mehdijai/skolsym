@@ -972,6 +972,10 @@ select {
   margin-left: auto;
   margin-right: auto;
 }
+.mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
 .ml-3 {
   margin-left: 0.75rem;
 }
@@ -1157,9 +1161,6 @@ select {
 }
 .shrink-0 {
   flex-shrink: 0;
-}
-.table-auto {
-  table-layout: auto;
 }
 .origin-top-left {
   transform-origin: top left;
@@ -1636,9 +1637,21 @@ select {
   --tw-text-opacity: 1;
   color: rgb(209 213 219 / var(--tw-text-opacity));
 }
-.text-cyan-600 {
+.text-orange-600 {
   --tw-text-opacity: 1;
-  color: rgb(8 145 178 / var(--tw-text-opacity));
+  color: rgb(234 88 12 / var(--tw-text-opacity));
+}
+.text-lime-600 {
+  --tw-text-opacity: 1;
+  color: rgb(101 163 13 / var(--tw-text-opacity));
+}
+.text-teal-600 {
+  --tw-text-opacity: 1;
+  color: rgb(13 148 136 / var(--tw-text-opacity));
+}
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity));
 }
 .underline {
   -webkit-text-decoration-line: underline;
@@ -1743,6 +1756,132 @@ select {
 .ease-in {
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
+.sym-container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin: 0 auto;
+  max-width: 64rem;
+}
+
+.sym-table-wrapper {
+  overflow-x: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.sym-table-container {
+  display: inline-block;
+  overflow: hidden;
+  min-width: 100%;
+  border-radius: 0.5rem;
+}
+
+.sym-table-container > table {
+  line-height: 1.5;
+  min-width: 100%;
+}
+
+.sym-table-container > table > thead > tr > th {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background-color: #ffffff;
+  color: #1f2937;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+  text-align: left;
+  text-transform: uppercase;
+  border-bottom-width: 1px;
+  border-color: #e5e7eb;
+}
+
+.sym-table-container > table > tbody > tr > td {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border-bottom-width: 1px;
+  border-color: #e5e7eb;
+}
+
+@media (min-width: 640px) {
+  .sym-table-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .sym-table-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    margin-left: -2rem;
+    margin-right: -2rem;
+  }
+}
+.tag-pill {
+  display: inline-block;
+  position: relative;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.tag-pill .tag-pill__bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  opacity: 0.5;
+}
+.tag-pill.green {
+  color: #064e3b;
+}
+.tag-pill.green .tag-pill__bg {
+  background-color: #A7F3D0;
+}
+.tag-pill.cyan {
+  color: #064e3b;
+}
+.tag-pill.cyan .tag-pill__bg {
+  background-color: #a7f3d0;
+}
+.tag-pill.red {
+  color: #064e3b;
+}
+.tag-pill.red .tag-pill__bg {
+  background-color: #a7f3d0;
+}
+.tag-pill.orange {
+  color: #064e3b;
+}
+.tag-pill.orange .tag-pill__bg {
+  background-color: #a7f3d0;
+}
+.tag-pill.amber {
+  color: #064e3b;
+}
+.tag-pill.amber .tag-pill__bg {
+  background-color: #a7f3d0;
+}
+.tag-pill.teal {
+  color: #064e3b;
+}
+.tag-pill.teal .tag-pill__bg {
+  background-color: #a7f3d0;
+}
+.tag-pill .tag-pill__content {
+  position: relative;
+}
 .hover\:border-gray-300:hover {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
@@ -1790,6 +1929,30 @@ select {
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+.hover\:text-indigo-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(49 46 129 / var(--tw-text-opacity));
+}
+.hover\:text-red-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(127 29 29 / var(--tw-text-opacity));
+}
+.hover\:text-orange-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(124 45 18 / var(--tw-text-opacity));
+}
+.hover\:text-lime-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(54 83 20 / var(--tw-text-opacity));
+}
+.hover\:text-teal-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(19 78 74 / var(--tw-text-opacity));
+}
+.hover\:text-blue-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(30 58 138 / var(--tw-text-opacity));
 }
 .focus\:z-10:focus {
   z-index: 10;
@@ -2186,4 +2349,3 @@ select {
     padding-right: 2rem;
   }
 }
-

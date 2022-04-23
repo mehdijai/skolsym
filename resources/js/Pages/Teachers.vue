@@ -1,62 +1,14 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import Table from "@/Jetstream/Table.vue";
+import { Link } from "@inertiajs/inertia-vue3";
+import JetNavLink from "@/Jetstream/NavLink.vue";
+import TagPill from "@/Jetstream/TagPill.vue";
+import JetDropdown from "@/Jetstream/Dropdown.vue";
+import JetDropdownLink from "@/Jetstream/DropdownLink.vue";
 
-const teachers = [
-  {
-    name: "Mehdi Jai",
-    email: "mehdi.jai.mj@gmail.com",
-    phone: "0612113830",
-    state: {
-      content: "active",
-      tagPill: true,
-      color: "green",
-    },
-    actions: [
-      {
-        icon: true,
-        content: "edit",
-        title: "Edit teacher",
-        route: "teachers.update",
-        class: "text-indigo-600 hover:text-indigo-900",
-      },
-      {
-        icon: true,
-        content: "delete",
-        title: "Edit Delete",
-        route: "teachers.delete",
-        class: "text-red-600 mx-2 hover:text-red-900",
-      },
-      {
-        icon: true,
-        content: "inventory_2",
-        title: "Archive teacher",
-        route: "teachers.archive",
-        class: "text-orange-600 mx-2 hover:text-orange-900",
-      },
-      {
-        icon: true,
-        content: "add_circle",
-        title: "Create a new course",
-        route: "teachers.courses.new",
-        class: "text-lime-600 mx-2 hover:text-lime-900",
-      },
-      {
-        icon: true,
-        content: "list",
-        title: "Display teacher's courses",
-        route: "teachers.courses.index",
-        class: "text-teal-600 mx-2 hover:text-teal-900",
-      },
-      {
-        icon: true,
-        content: "info",
-        title: "Display teacher's details",
-        class: "text-blue-600 mx-2 hover:text-blue-900",
-      },
-    ],
-  },
-];
+defineProps({
+  teachers: Array,
+});
 </script>
 
 <template>
@@ -69,7 +21,130 @@ const teachers = [
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <Table :data="teachers" title="Teachers" />
+        <div class="sym-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="teacher in teachers" :key="teacher.id">
+                <tr>
+                  <td>
+                    <div class="flex items-center">
+                      <Link class="font-bold" :href="route('profile.show')">
+                        <p
+                          class="
+                            text-gray-900
+                            hover:text-gray-500
+                            whitespace-no-wrap
+                          "
+                        >
+                          {{ teacher.name }}
+                        </p>
+                      </Link>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <a
+                        :href="'mailto:' + teacher.email"
+                        class="
+                          text-cyan-600
+                          hover:text-cyan-800
+                          whitespace-no-wrap
+                        "
+                      >
+                        {{ teacher.email }}
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <a
+                        :href="'tel:' + teacher.phone"
+                        class="
+                          text-cyan-600
+                          hover:text-cyan-800
+                          whitespace-no-wrap
+                        "
+                      >
+                        {{ teacher.phone }}
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <TagPill :value="teacher.state" />
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <div class="ml-3 relative">
+                        <JetDropdown align="right" width="48">
+                          <template #trigger>
+                            <span class="ddl-trigger-wrapper">
+                              <span class="material-icons"> more_horiz </span>
+                            </span>
+                          </template>
+
+                          <template #content>
+                            <div class="ddl-content-wrapper">
+                              <JetDropdownLink :href="route('profile.show')">
+                                <span class="flex items-center">
+                                  <span
+                                    class="material-icons text-gray-400 text-xs"
+                                    >edit</span
+                                  >
+                                  <span class="ml-2">Update</span>
+                                </span>
+                              </JetDropdownLink>
+
+                              <JetDropdownLink :href="route('profile.show')">
+                                <span class="flex items-center">
+                                  <span
+                                    class="material-icons text-gray-400 text-xs"
+                                    >delete</span
+                                  >
+                                  <span class="ml-2">Delete</span>
+                                </span>
+                              </JetDropdownLink>
+
+                              <JetDropdownLink :href="route('profile.show')">
+                                <span class="flex items-center">
+                                  <span
+                                    class="material-icons text-gray-400 text-xs"
+                                    >inventory_2</span
+                                  >
+                                  <span class="ml-2">Archive</span>
+                                </span>
+                              </JetDropdownLink>
+
+                              <JetDropdownLink :href="route('profile.show')">
+                                <span class="flex items-center">
+                                  <span
+                                    class="material-icons text-gray-400 text-xs"
+                                    >list</span
+                                  >
+                                  <span class="ml-2">Courses</span>
+                                </span>
+                              </JetDropdownLink>
+                            </div>
+                          </template>
+                        </JetDropdown>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </AppLayout>

@@ -1,0 +1,39 @@
+.ddl-trigger-wrapper {
+    display: inline-flex;
+
+    .material-icons {
+        cursor: pointer;
+        padding: 0.9rem;
+        border-radius: 100%;
+        background-color: #e5e5e5;
+        margin: 0 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        font-size: 1.2rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &:hover{
+            background-color: #c7c7c7;
+        }
+    }
+}
+
+.ddl-content-wrapper {
+    .header {
+        display: block;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        color: #9ca3af;
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+    .divider {
+        border-top-width: 1px;
+        border-color: #f3f4f6;
+    }
+}

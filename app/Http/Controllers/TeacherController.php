@@ -9,9 +9,16 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class TeacherController extends Controller
 {
+    public function index()
+    {
+        return Inertia::render('Teachers', [
+            'teachers' => Teacher::all(),
+        ]);
+    }
     public function get_teachers()
     {
         $query = Teacher::query()->where('state', 'active');
