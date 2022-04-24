@@ -1,34 +1,57 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { useForm } from "@inertiajs/inertia-vue3";
+import { useForm, Link } from "@inertiajs/inertia-vue3";
 import JetButton from "@/Jetstream/Button.vue";
 import JetInput from "@/Jetstream/Input.vue";
 import JetSelectInput from "@/Jetstream/SelectInput.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
+import Breadcrumbs from "@/Jetstream/Breadcrumbs.vue";
+import Checkbox from "@/Jetstream/Checkbox.vue";
+import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   states: Object,
+  teacher: {
+    type: Object,
+    default: null,
+  },
+});
+
+const edit = computed(() => {
+  return props.teacher !== null;
 });
 
 const form = useForm({
-  name: "",
-  email: "",
-  phone: "",
-  state: props.states[Object.keys(props.states)[0]],
+  id: edit.value ? props.teacher.id : null,
+  name: edit.value ? props.teacher.name : "",
+  email: edit.value ? props.teacher.email : "",
+  phone: edit.value ? props.teacher.phone : "",
+  state: edit.value
+    ? props.teacher.state
+    : props.states[Object.keys(props.states)[0]],
+  archived: edit.value ? Boolean(props.teacher.archived) : false,
 });
 
 const submit = () => {
-  form.post(route("teachers.store"));
+  if (edit.value === true) {
+    form.post(route("teachers.edit"));
+  } else {
+    form.post(route("teachers.store"));
+  }
 };
 </script>
 
 <template>
-  <AppLayout title="Teachers">
+  <AppLayout :title="edit ? 'Update teacher' : 'Create teacher'">
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        Add a new teacher
-      </h2>
+      <Breadcrumbs>
+        <template #items>
+          <li><Link :href="route('dashboard')">Dashboard</Link></li>
+          <li><Link :href="route('teachers.index')">Teachers</Link></li>
+          <li>{{ edit ? "Update" : "Create" }}</li>
+        </template>
+      </Breadcrumbs>
     </template>
     <div
       class="
@@ -40,11 +63,17 @@ const submit = () => {
         bg-gray-100
       "
     >
+      <div class="py-4 mt-6">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          {{
+            edit ? "Update " + teacher.name + "'s data" : "Create a new teacher"
+          }}
+        </h2>
+      </div>
       <div
         class="
           w-full
           sm:max-w-3xl
-          mt-6
           px-6
           py-4
           bg-white
@@ -126,13 +155,24 @@ const submit = () => {
             </div>
           </div>
 
+          <div v-if="edit" class="flex items-center mt-4">
+            <Checkbox
+              id="archive"
+              v-model="form.archived"
+              :checked="form.archived"
+            />
+            <label for="archive" class="label-text ml-2 font-bold"
+              >Archived</label
+            >
+          </div>
+
           <div class="flex items-center justify-end mt-4">
             <JetButton
               class="mx-auto"
               :class="{ 'opacity-25': form.processing }"
               :disabled="form.processing"
             >
-              Create
+              {{ edit ? "Update" : "Create" }}
             </JetButton>
           </div>
         </form>

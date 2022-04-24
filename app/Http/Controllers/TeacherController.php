@@ -15,50 +15,29 @@ class TeacherController extends Controller
 {
     public function index()
     {
+        $query = Teacher::query();
+
+        switch (request('filter')) {
+            case StateLists::TEACHER['ACTIVE']:
+                $query->where('state', 'active')->where('archived', false);
+                break;
+            case StateLists::TEACHER['REMOVED']:
+                $query->where('state', 'removed')->where('archived', false);
+                break;
+            case 'archived':$query->where('archived', true);
+                break;
+        }
+
         return Inertia::render('Teacher/Show', [
-            'teachers' => Teacher::all(),
+            'teachers' => $query->get(),
         ]);
     }
+
     public function create()
     {
         return Inertia::render('Teacher/Create', [
             'states' => StateLists::TEACHER,
         ]);
-    }
-    public function get_teachers()
-    {
-        $query = Teacher::query()->where('state', 'active');
-
-        if (request('archived')) {
-            $query->where('archived', true);
-        } else {
-            $query->where('archived', false);
-        }
-
-        if (request('notActive')) {
-            $query->orWhere('state', '!=', 'active');
-        }
-
-        if (request('courses')) {
-            $query->with('courses');
-        }
-
-        $teachers = $query->get();
-
-        return response()->json($teachers, 200);
-    }
-
-    public function get_teacher($id)
-    {
-        $query = Teacher::query();
-
-        if (request('courses')) {
-            $query->with('courses');
-        }
-
-        $teacher = $query->find($id);
-
-        return response()->json($teacher, 200);
     }
 
     public function store(Request $request)
@@ -76,6 +55,14 @@ class TeacherController extends Controller
         return redirect()->route('teachers.index');
     }
 
+    public function update($id)
+    {
+        return Inertia::render('Teacher/Create', [
+            'states' => StateLists::TEACHER,
+            'teacher' => Teacher::findOrFail($id),
+        ]);
+    }
+
     public function edit(Request $request)
     {
 
@@ -84,13 +71,9 @@ class TeacherController extends Controller
             'name' => 'required|max:50|min:4',
             'email' => 'required|email',
             'phone' => 'required|string',
-            'state' => ['sometimes', 'nullable', Rule::in(StateLists::TEACHER)],
-            'archived' => 'sometimes|boolean',
+            'state' => ['required', Rule::in(StateLists::TEACHER)],
+            'archived' => 'required|boolean',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
 
         $validated = $validator->validated();
 
@@ -99,19 +82,16 @@ class TeacherController extends Controller
         $teacher->name = $validated["name"];
         $teacher->email = $validated["email"];
         $teacher->phone = $validated["phone"];
-
-        if (array_key_exists('state', $validated)) {
-            $teacher->state = $validated["state"];
-        }
+        $teacher->state = $validated["state"];
 
         if (array_key_exists('archived', $validated)) {
 
-            if ((bool) $validated["archived"] == true && $teacher->archived == false) {
+            if ($validated["archived"] == true) {
                 $teacher->archived = true;
                 $teacher->archived_at = new DateTime();
             }
 
-            if ((bool) $validated["archived"] == false && $teacher->archived == true) {
+            if ($validated["archived"] == false) {
                 $teacher->archived = false;
                 $teacher->archived_at = null;
             }
@@ -119,7 +99,26 @@ class TeacherController extends Controller
 
         $teacher->save();
 
-        return response()->json($teacher, 200);
+        return redirect()->route('teachers.index');
+    }
+
+    public function archive($id)
+    {
+
+        $teacher = Teacher::find($id);
+
+        if ($teacher->archived == true) {
+
+            $teacher->archived = false;
+            $teacher->archived_at = null;
+        } else {
+            $teacher->archived = true;
+            $teacher->archived_at = new DateTime();
+        }
+
+        $teacher->save();
+
+        return redirect()->route('teachers.index');
     }
 
     public function delete(Request $request)

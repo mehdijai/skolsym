@@ -39,6 +39,9 @@ Route::middleware([
         Route::get('/', [TeacherController::class, 'index'])->name('index');
         Route::get('/create', [TeacherController::class, 'create'])->name('create');
         Route::post('/store', [TeacherController::class, 'store'])->name('store');
+        Route::get('/update/{id}', [TeacherController::class, 'update'])->name('update');
+        Route::post('/edit', [TeacherController::class, 'edit'])->name('edit');
+        Route::get('/archive/{id}', [TeacherController::class, 'archive'])->name('archive');
     });
 
     // Course Routes

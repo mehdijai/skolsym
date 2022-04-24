@@ -29,6 +29,7 @@
         "vue-loader": "^17.0.0"
     },
     "dependencies": {
+        "daisyui": "^2.14.2",
         "material-icons": "^1.10.8"
     }
 }
