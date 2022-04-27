@@ -5,10 +5,10 @@
     "./componets/drop-down-list";
 
 .material-icons {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     &.text-xs{
-        font-size: 1.3rem;
+        font-size: 1.1rem;
     }
 }

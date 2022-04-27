@@ -2,23 +2,38 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/inertia-vue3";
 import TagPill from "@/Jetstream/TagPill.vue";
+import Breadcrumbs from "@/Jetstream/Breadcrumbs.vue";
+import RemoveCard from "@/Jetstream/RemoveCard.vue";
 import JetSelectInput from "@/Jetstream/SelectInput.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
-import Breadcrumbs from "@/Jetstream/Breadcrumbs.vue";
-import RemoveCard from "@/Jetstream/RemoveCard.vue";
 import { ref } from "@vue/reactivity";
+import { computed } from "@vue/runtime-core";
 
-const removeTeacher = ref(null);
+const props = defineProps({
+  courses: Array,
+  errors: Object,
+});
 
-const deleteTeacher = (t) => {
-  removeTeacher.value = t;
+const removeCourse = ref(null);
+
+const filteredCourses = (t) => {
+  return props.courses.filter(
+    (c) => c.id !== t.id && c.state == "active" && !t.archived
+  );
+};
+
+const deleteCourse = (t) => {
+  removeCourse.value = t;
   form.id = t.id;
-  form.assign_to = null;
+  form.assign_to =
+    t.groups_count > 0 && filteredCourses(t).length > 0
+      ? String(filteredCourses(t)[0].id)
+      : null;
 };
 
 const cancelDeletion = () => {
-  removeTeacher.value = null;
+  removeCourse.value = null;
   form.reset();
 };
 
@@ -28,44 +43,43 @@ const form = useForm({
 });
 
 const confirmDeletion = () => {
-  form.post(route("teachers.delete"), {
-    onFinish: () => cancelDeletion(),
+  form.post(route("courses.delete"), {
+    onSuccess: () => cancelDeletion(),
   });
 };
-
-defineProps({
-  teachers: Array,
-});
 </script>
 
 <template>
-  <AppLayout title="Teachers">
+  <AppLayout title="Courses">
     <template #header>
       <Breadcrumbs>
         <template #items>
           <li><Link :href="route('dashboard')">Dashboard</Link></li>
-          <li>Teachers</li>
+          <li>Courses</li>
         </template>
       </Breadcrumbs>
     </template>
 
     <RemoveCard
-      v-if="removeTeacher !== null"
+      v-if="removeCourse !== null"
       @confirm="confirmDeletion"
       @cancel="cancelDeletion"
     >
       <template #content>
         <p class="text-gray-800 dark:text-gray-200 text-xl font-bold mt-4">
-          Remove {{ removeTeacher.name }}
+          Remove {{ removeCourse.title }}
         </p>
         <p class="text-gray-600 dark:text-gray-400 text-xs py-2 px-6">
           Are you sure you want to delete this record ?
         </p>
         <div
-          v-if="removeTeacher.courses_count > 0"
+          v-if="
+            removeCourse.groups_count > 0 &&
+            filteredCourses(removeCourse).length > 0
+          "
           class="px-4 border-1 rounded"
         >
-          <JetLabel for="assign_to" value="Assign courses to a teacher" />
+          <JetLabel for="assign_to" value="Assign groups to a course" />
           <JetSelectInput
             id="assign_to"
             v-model="form.assign_to"
@@ -73,13 +87,11 @@ defineProps({
           >
             <template #options>
               <template
-                v-for="(teacher, index) in teacher.filter(
-                  (t) => t.id !== form.id
-                )"
+                v-for="(course, index) in filteredCourses(removeCourse)"
                 :key="'ts-' + index"
               >
-                <option :value="teacher.id">
-                  {{ teacher.name }} ({{ teacher.courses_count }})
+                <option :value="course.id">
+                  {{ course.title }} ({{ course.groups_count }})
                 </option>
               </template>
             </template>
@@ -104,27 +116,29 @@ defineProps({
                 text-2xl
                 leading-tight
               "
-              :href="route('teachers.create')"
-              >Add new teacher</Link
+              :href="route('courses.create')"
+              >Create new course</Link
             >
           </div>
           <table>
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Status</th>
+                <th scope="col">Title</th>
+                <th scope="col">Teacher</th>
+                <th scope="col">Period</th>
+                <th scope="col">Price</th>
+                <th scope="col">Payment type</th>
+                <th scope="col">State</th>
                 <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <template v-for="teacher in teachers" :key="teacher.id">
+              <template v-for="course in courses" :key="course.id">
                 <tr
                   :class="
-                    teacher.state === 'removed'
+                    course.state === 'removed'
                       ? 'bg-red-50'
-                      : teacher.archived
+                      : course.archived
                       ? 'bg-orange-50'
                       : 'bg-white'
                   "
@@ -139,60 +153,73 @@ defineProps({
                             whitespace-no-wrap
                           "
                         >
-                          {{ teacher.name }}
+                          {{ course.title }}
                         </p>
                       </Link>
                     </div>
                   </td>
                   <td>
                     <div class="flex items-center">
-                      <a
-                        :href="'mailto:' + teacher.email"
+                      <Link
+                        :href="route('profile.show')"
                         class="
                           text-cyan-600
                           hover:text-cyan-800
                           whitespace-no-wrap
+                          flex
+                          items-center
+                          font-semibold
                         "
                       >
-                        {{ teacher.email }}
-                      </a>
+                        {{ course.teacher.name }}
+                        <span class="material-icons text-xs ml-1"
+                          >open_in_new</span
+                        >
+                      </Link>
                     </div>
                   </td>
                   <td>
                     <div class="flex items-center">
-                      <a
-                        :href="'tel:' + teacher.phone"
-                        class="
-                          text-cyan-600
-                          hover:text-cyan-800
-                          whitespace-no-wrap
-                        "
-                      >
-                        {{ teacher.phone }}
-                      </a>
+                      <p class="whitespace-no-wrap">
+                        {{ course.period }} week{{
+                          Number(course.period) > 1 ? "s" : ""
+                        }}
+                      </p>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <p class="whitespace-no-wrap">{{ course.price }} DH</p>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <p class="capitalize whitespace-no-wrap">
+                        {{ course.payment_type }}
+                      </p>
                     </div>
                   </td>
                   <td>
                     <div class="flex items-center">
                       <Link
                         :href="
-                          route('teachers.index', {
+                          route('courses.index', {
                             filter:
-                              teacher.state === 'removed'
-                                ? teacher.state
-                                : teacher.archived
+                              course.state === 'removed'
+                                ? course.state
+                                : course.archived
                                 ? 'archived'
-                                : teacher.state,
+                                : course.state,
                           })
                         "
                       >
                         <TagPill
                           :value="
-                            teacher.state === 'removed'
-                              ? teacher.state
-                              : teacher.archived
+                            course.state === 'removed'
+                              ? course.state
+                              : course.archived
                               ? 'archived'
-                              : teacher.state
+                              : course.state
                           "
                         />
                       </Link>
@@ -220,6 +247,7 @@ defineProps({
                             class="
                               dropdown-content
                               menu
+                              z-40
                               shadow
                               bg-base-100
                               rounded-md
@@ -229,7 +257,7 @@ defineProps({
                             <li>
                               <Link
                                 :href="
-                                  route('teachers.update', { id: teacher.id })
+                                  route('courses.update', { id: course.id })
                                 "
                               >
                                 <span class="flex items-center">
@@ -243,7 +271,7 @@ defineProps({
                             </li>
 
                             <li>
-                              <p @click="deleteTeacher(teacher)">
+                              <p @click="deleteCourse(course)">
                                 <span class="flex items-center">
                                   <span
                                     class="material-icons text-gray-400 text-xs"
@@ -253,21 +281,20 @@ defineProps({
                                 </span>
                               </p>
                             </li>
+
                             <li>
-                              <Link
-                                :href="route('teachers.archive', teacher.id)"
-                              >
+                              <Link :href="route('courses.archive', course.id)">
                                 <span class="flex items-center">
                                   <span
                                     class="material-icons text-gray-400 text-xs"
                                     >{{
-                                      teacher.archived
+                                      course.archived
                                         ? "unarchive"
                                         : "inventory_2"
                                     }}</span
                                   >
                                   <span class="ml-2">{{
-                                    teacher.archived ? "Unarchive" : "Archive"
+                                    course.archived ? "Unarchive" : "Archive"
                                   }}</span>
                                 </span>
                               </Link>
@@ -279,24 +306,18 @@ defineProps({
                                     class="material-icons text-gray-400 text-xs"
                                     >list</span
                                   >
-                                  <span class="ml-2">Courses</span>
+                                  <span class="ml-2">Groups</span>
                                 </span>
                               </Link>
                             </li>
                             <li>
-                              <Link
-                                :href="
-                                  route('courses.create', {
-                                    teacher: teacher.id,
-                                  })
-                                "
-                              >
+                              <Link :href="route('profile.show')">
                                 <span class="flex items-center">
                                   <span
                                     class="material-icons text-gray-400 text-xs"
                                     >add_circle</span
                                   >
-                                  <span class="ml-2">Add course</span>
+                                  <span class="ml-2">Add group</span>
                                 </span>
                               </Link>
                             </li>

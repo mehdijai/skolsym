@@ -15,7 +15,7 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        $query = Teacher::query();
+        $query = Teacher::query()->withCount('courses');
 
         switch (request('filter')) {
             case StateLists::TEACHER['ACTIVE']:
@@ -123,14 +123,33 @@ class TeacherController extends Controller
 
     public function delete(Request $request)
     {
-        $validated = $request->validate([
-            'id' => 'required|numeric',
-            'assign_to' => 'sometimes|numeric|exists:teachers,id',
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|numeric|exists:teachers,id',
+            'assign_to' => function ($value, $attribute) {
+                if ($value == null) {
+                    return [
+                        'nullable',
+                    ];
+                } else {
+                    return [
+                        'numeric',
+                        Rule::exists(Teacher::class, 'id'),
+                    ];
+                }
+            },
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('teachers.index')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $validated = $validator->validated();
 
         $teacher = Teacher::find($validated['id']);
 
-        $teacher->state = "removed";
+        $teacher->state = StateLists::TEACHER['REMOVED'];
         $teacher->archived = true;
         $teacher->archived_at = new DateTime();
 
@@ -139,12 +158,12 @@ class TeacherController extends Controller
         } else {
             $cc = new CourseController();
             foreach ($teacher->courses as $course) {
-                $cc->delete($course->id);
+                $cc->remove($course->id, null, true);
             }
         }
 
         $teacher->save();
 
-        return response()->json(['message' => 'teacher deleted'], 200);
+        return redirect()->route('teachers.index');
     }
 }

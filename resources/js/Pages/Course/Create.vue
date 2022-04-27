@@ -13,43 +13,48 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   states: Object,
-  teacher: {
+  payment_types: Object,
+  teachers: Object,
+  withTeacher: [null, String],
+  course: {
     type: Object,
     default: null,
   },
 });
 
 const edit = computed(() => {
-  return props.teacher !== null;
+  return props.course !== null;
 });
 
 const form = useForm({
-  id: edit.value ? props.teacher.id : null,
-  name: edit.value ? props.teacher.name : "",
-  email: edit.value ? props.teacher.email : "",
-  phone: edit.value ? props.teacher.phone : "",
+  id: edit.value ? props.course.id : null,
+  title: edit.value ? props.course.title : "",
+  period: edit.value ? String(props.course.period) : "",
+  price: edit.value ? String(props.course.price) : "",
+  payment_type: edit.value ? props.course.payment_type : "monthly",
+  teacher_id: edit.value ? String(props.course.teacher_id) : props.withTeacher,
   state: edit.value
-    ? props.teacher.state
+    ? props.course.state
     : props.states[Object.keys(props.states)[0]],
-  archived: edit.value ? Boolean(props.teacher.archived) : false,
+  archived: edit.value ? Boolean(props.course.archived) : false,
 });
 
 const submit = () => {
   if (edit.value === true) {
-    form.post(route("teachers.edit"));
+    form.post(route("courses.edit"));
   } else {
-    form.post(route("teachers.store"));
+    form.post(route("courses.store"));
   }
 };
 </script>
 
 <template>
-  <AppLayout :title="edit ? 'Update teacher' + teacher.name : 'Create teacher'">
+  <AppLayout :title="edit ? 'Update course' + course.title : 'Create course'">
     <template #header>
       <Breadcrumbs>
         <template #items>
           <li><Link :href="route('dashboard')">Dashboard</Link></li>
-          <li><Link :href="route('teachers.index')">Teachers</Link></li>
+          <li><Link :href="route('courses.index')">Courses</Link></li>
           <li>{{ edit ? "Update" : "Create" }}</li>
         </template>
       </Breadcrumbs>
@@ -67,7 +72,7 @@ const submit = () => {
       <div class="py-4 mt-6">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
           {{
-            edit ? "Update " + teacher.name + "'s data" : "Create a new teacher"
+            edit ? "Update " + course.title + "'s data" : "Create a new course"
           }}
         </h2>
       </div>
@@ -85,51 +90,103 @@ const submit = () => {
       >
         <form @submit.prevent="submit">
           <div class="grid grid-cols-2 gap-4">
+
             <div>
-              <JetLabel for="name" value="Name" />
+              <JetLabel for="teacher_id" value="Teacher" />
+              <JetSelectInput
+                id="teacher_id"
+                v-model="form.teacher_id"
+                class="mt-1 block w-full"
+                required
+              >
+                <template #options>
+                  <template
+                    v-for="(teacher, index) in teachers"
+                    :key="index"
+                  >
+                    <option class="capitalize" :value="teacher.id">
+                      {{ teacher.name }}
+                    </option>
+                  </template>
+                </template>
+              </JetSelectInput>
+              <JetInputError
+                v-if="form.errors.teacher_id"
+                :message="form.errors.teacher_id"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="title" value="Title" />
               <JetInput
-                id="name"
-                v-model="form.name"
+                id="title"
+                v-model="form.title"
                 type="text"
                 class="mt-1 block w-full"
                 required
                 autofocus
-                autocomplete="name"
+                autocomplete="title"
               />
               <JetInputError
-                v-if="form.errors.name"
-                :message="form.errors.name"
+                v-if="form.errors.title"
+                :message="form.errors.title"
               />
             </div>
 
             <div>
-              <JetLabel for="email" value="Email" />
+              <JetLabel for="period" value="Period in weeks" />
               <JetInput
-                id="email"
-                v-model="form.email"
-                type="email"
+                id="period"
+                v-model="form.period"
+                type="number"
                 class="mt-1 block w-full"
                 required
+                autocomplete="period"
               />
               <JetInputError
-                v-if="form.errors.email"
-                :message="form.errors.email"
+                v-if="form.errors.period"
+                :message="form.errors.period"
               />
             </div>
 
             <div>
-              <JetLabel for="phone" value="Phone" />
+              <JetLabel for="price" value="Price" />
               <JetInput
-                id="phone"
-                v-model="form.phone"
-                type="tel"
+                id="price"
+                v-model="form.price"
+                type="number"
                 class="mt-1 block w-full"
                 required
-                autocomplete="phone"
+                autocomplete="price"
               />
               <JetInputError
-                v-if="form.errors.phone"
-                :message="form.errors.phone"
+                v-if="form.errors.price"
+                :message="form.errors.price"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="payment_type" value="Payment type" />
+              <JetSelectInput
+                id="payment_type"
+                v-model="form.payment_type"
+                class="mt-1 block w-full"
+                required
+              >
+                <template #options>
+                  <template
+                    v-for="(payment_type, index) in payment_types"
+                    :key="index"
+                  >
+                    <option class="capitalize" :value="payment_type">
+                      {{ payment_type }}
+                    </option>
+                  </template>
+                </template>
+              </JetSelectInput>
+              <JetInputError
+                v-if="form.errors.payment_type"
+                :message="form.errors.payment_type"
               />
             </div>
 
@@ -171,7 +228,7 @@ const submit = () => {
             <JetButtonSecondary
               class="mr-3"
               :disabled="form.processing"
-              @click="$inertia.get(route('teachers.index'))"
+              @click="$inertia.get(route('courses.index'))"
             >
               Cancel
             </JetButtonSecondary>
