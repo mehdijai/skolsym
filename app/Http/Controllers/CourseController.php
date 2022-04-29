@@ -8,7 +8,6 @@ use App\Models\Group;
 use App\Models\Teacher;
 use DateTime;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -20,14 +19,26 @@ class CourseController extends Controller
         $query = Course::query()->with('teacher')->withCount('groups');
 
         if (in_array(request('filter'), StateLists::COURSE)) {
-            $query->where('state', request('filter'))->where('archived', false);
+            $query->where('state', request('filter'));
         }
+
         if (request('filter') == 'archived') {
             $query->where('archived', true);
         }
 
+        if (request('search')) {
+            $query->where(function ($query) {
+                $query->whereRelation('teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('title', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('period', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('price', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('payment_type', 'LIKE', '%' . request('search') . '%');
+            });
+        }
+
         return Inertia::render('Course/Show', [
             'courses' => $query->get(),
+            'states' => array_merge(['', 'archived'], array_values(StateLists::COURSE)),
         ]);
     }
 

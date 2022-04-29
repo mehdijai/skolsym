@@ -28,8 +28,17 @@ class TeacherController extends Controller
                 break;
         }
 
+        if (request('search')) {
+            $query->where(function ($query) {
+                $query->where('name', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('email', 'LIKE', '%' . request('search') . '%')
+                    ->orWhere('phone', 'LIKE', '%' . request('search') . '%');
+            });
+        }
+
         return Inertia::render('Teacher/Show', [
             'teachers' => $query->get(),
+            'states' => array_merge(['', 'archived'], array_values(StateLists::TEACHER)),
         ]);
     }
 

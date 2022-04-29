@@ -7,7 +7,14 @@ import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
 import Breadcrumbs from "@/Jetstream/Breadcrumbs.vue";
 import RemoveCard from "@/Jetstream/RemoveCard.vue";
+import FilterSystem from "@/Jetstream/FilterSystem.vue";
 import { ref } from "@vue/reactivity";
+
+
+defineProps({
+  teachers: Array,
+  states: Object,
+});
 
 const removeTeacher = ref(null);
 
@@ -32,10 +39,6 @@ const confirmDeletion = () => {
     onFinish: () => cancelDeletion(),
   });
 };
-
-defineProps({
-  teachers: Array,
-});
 </script>
 
 <template>
@@ -95,7 +98,9 @@ defineProps({
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="sym-container">
-          <div class="py-8 flex flex-row mb-1 sm:mb-0 justify-between w-full">
+          <div
+            class="py-8 flex flex-row gap-x-4 mb-1 sm:mb-0 justify-end w-full"
+          >
             <Link
               class="
                 text-sky-800
@@ -103,11 +108,14 @@ defineProps({
                 font-bold
                 text-2xl
                 leading-tight
+                mr-auto
               "
               :href="route('teachers.create')"
               >Add new teacher</Link
             >
+            <FilterSystem model="teachers" :states="states" />
           </div>
+
           <table>
             <thead>
               <tr>

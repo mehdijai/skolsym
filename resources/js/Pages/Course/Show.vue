@@ -7,12 +7,14 @@ import RemoveCard from "@/Jetstream/RemoveCard.vue";
 import JetSelectInput from "@/Jetstream/SelectInput.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
+import FilterSystem from "@/Jetstream/FilterSystem.vue";
 import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   courses: Array,
   errors: Object,
+  states: Object
 });
 
 const removeCourse = ref(null);
@@ -107,7 +109,7 @@ const confirmDeletion = () => {
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="sym-container">
-          <div class="py-8 flex flex-row mb-1 sm:mb-0 justify-between w-full">
+          <div class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full">
             <Link
               class="
                 text-sky-800
@@ -115,10 +117,12 @@ const confirmDeletion = () => {
                 font-bold
                 text-2xl
                 leading-tight
+                mr-auto
               "
               :href="route('courses.create')"
               >Create new course</Link
             >
+            <FilterSystem model="courses" :states="states" />
           </div>
           <table>
             <thead>
