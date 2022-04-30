@@ -42,6 +42,19 @@ class TeacherController extends Controller
         ]);
     }
 
+    public function view($id)
+    {
+        $teacher = Teacher::find($id);
+
+        if (empty($teacher)) {
+            abort(404, "This teacher doesn't exist in our records");
+        }
+
+        return Inertia::render('Teacher/View', [
+            'teacher' => $teacher,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('Teacher/Create', [

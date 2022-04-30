@@ -44,6 +44,7 @@ Route::middleware([
         Route::post('/edit', [TeacherController::class, 'edit'])->name('edit');
         Route::get('/archive/{id}', [TeacherController::class, 'archive'])->name('archive');
         Route::post('/delete', [TeacherController::class, 'delete'])->name("delete");
+        Route::get('/{id}', [TeacherController::class, 'view'])->name('view');
     });
 
     // Course Routes

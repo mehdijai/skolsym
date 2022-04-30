@@ -165,7 +165,7 @@ const confirmDeletion = () => {
                   <td>
                     <div class="flex items-center">
                       <Link
-                        :href="route('profile.show')"
+                        :href="route('teachers.view', [course.teacher.id])"
                         class="
                           text-cyan-600
                           hover:text-cyan-800

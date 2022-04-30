@@ -139,7 +139,7 @@ const confirmDeletion = () => {
                 >
                   <td>
                     <div class="flex items-center">
-                      <Link class="font-bold" :href="route('profile.show')">
+                      <Link class="font-bold" :href="route('teachers.view', [teacher.id])">
                         <p
                           class="
                             text-gray-900
