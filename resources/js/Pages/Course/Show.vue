@@ -8,13 +8,14 @@ import JetSelectInput from "@/Jetstream/SelectInput.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
 import FilterSystem from "@/Jetstream/FilterSystem.vue";
+import CourseTable from "@/DataComponents/CourseTable.vue";
 import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   courses: Array,
   errors: Object,
-  states: Object
+  states: Object,
 });
 
 const removeCourse = ref(null);
@@ -108,233 +109,27 @@ const confirmDeletion = () => {
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="sym-container">
-          <div class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full">
-            <Link
-              class="
-                text-sky-800
-                hover:text-sky-600
-                font-bold
-                text-2xl
-                leading-tight
-                mr-auto
-              "
-              :href="route('courses.create')"
-              >Create new course</Link
+        <CourseTable :courses="courses">
+          <template #header>
+            <div
+              class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full"
             >
-            <FilterSystem model="courses" :states="states" />
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Title</th>
-                <th scope="col">Teacher</th>
-                <th scope="col">Period</th>
-                <th scope="col">Price</th>
-                <th scope="col">Payment type</th>
-                <th scope="col">State</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="course in courses" :key="course.id">
-                <tr
-                  :class="
-                    course.state === 'removed'
-                      ? 'bg-red-50'
-                      : course.archived
-                      ? 'bg-orange-50'
-                      : 'bg-white'
-                  "
-                >
-                  <td>
-                    <div class="flex items-center">
-                      <Link class="font-bold" :href="route('profile.show')">
-                        <p
-                          class="
-                            text-gray-900
-                            hover:text-gray-500
-                            whitespace-no-wrap
-                          "
-                        >
-                          {{ course.title }}
-                        </p>
-                      </Link>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <Link
-                        :href="route('teachers.view', [course.teacher.id])"
-                        class="
-                          text-cyan-600
-                          hover:text-cyan-800
-                          whitespace-no-wrap
-                          flex
-                          items-center
-                          font-semibold
-                        "
-                      >
-                        {{ course.teacher.name }}
-                        <span class="material-icons text-xs ml-1"
-                          >open_in_new</span
-                        >
-                      </Link>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <p class="whitespace-no-wrap">
-                        {{ course.period }} week{{
-                          Number(course.period) > 1 ? "s" : ""
-                        }}
-                      </p>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <p class="whitespace-no-wrap">{{ course.price }} DH</p>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <p class="capitalize whitespace-no-wrap">
-                        {{ course.payment_type }}
-                      </p>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <Link
-                        :href="
-                          route('courses.index', {
-                            filter:
-                              course.state === 'removed'
-                                ? course.state
-                                : course.archived
-                                ? 'archived'
-                                : course.state,
-                          })
-                        "
-                      >
-                        <TagPill
-                          :value="
-                            course.state === 'removed'
-                              ? course.state
-                              : course.archived
-                              ? 'archived'
-                              : course.state
-                          "
-                        />
-                      </Link>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center">
-                      <div class="ml-3 relative">
-                        <div class="dropdown dropdown-end">
-                          <label
-                            tabindex="0"
-                            class="
-                              material-icons
-                              bg-gray-200
-                              rounded-full
-                              px-2
-                              cursor-pointer
-                              hover:bg-gray-300
-                            "
-                          >
-                            more_horiz
-                          </label>
-                          <ul
-                            tabindex="0"
-                            class="
-                              dropdown-content
-                              menu
-                              z-40
-                              shadow
-                              bg-base-100
-                              rounded-md
-                              w-52
-                            "
-                          >
-                            <li>
-                              <Link
-                                :href="
-                                  route('courses.update', { id: course.id })
-                                "
-                              >
-                                <span class="flex items-center">
-                                  <span
-                                    class="material-icons text-gray-400 text-xs"
-                                    >edit</span
-                                  >
-                                  <span class="ml-2">Update</span>
-                                </span>
-                              </Link>
-                            </li>
-
-                            <li>
-                              <p @click="deleteCourse(course)">
-                                <span class="flex items-center">
-                                  <span
-                                    class="material-icons text-gray-400 text-xs"
-                                    >delete</span
-                                  >
-                                  <span class="ml-2">Delete</span>
-                                </span>
-                              </p>
-                            </li>
-
-                            <li>
-                              <Link :href="route('courses.archive', course.id)">
-                                <span class="flex items-center">
-                                  <span
-                                    class="material-icons text-gray-400 text-xs"
-                                    >{{
-                                      course.archived
-                                        ? "unarchive"
-                                        : "inventory_2"
-                                    }}</span
-                                  >
-                                  <span class="ml-2">{{
-                                    course.archived ? "Unarchive" : "Archive"
-                                  }}</span>
-                                </span>
-                              </Link>
-                            </li>
-                            <li>
-                              <Link :href="route('profile.show')">
-                                <span class="flex items-center">
-                                  <span
-                                    class="material-icons text-gray-400 text-xs"
-                                    >list</span
-                                  >
-                                  <span class="ml-2">Groups</span>
-                                </span>
-                              </Link>
-                            </li>
-                            <li>
-                              <Link :href="route('profile.show')">
-                                <span class="flex items-center">
-                                  <span
-                                    class="material-icons text-gray-400 text-xs"
-                                    >add_circle</span
-                                  >
-                                  <span class="ml-2">Add group</span>
-                                </span>
-                              </Link>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
+              <Link
+                class="
+                  text-sky-800
+                  hover:text-sky-600
+                  font-bold
+                  text-2xl
+                  leading-tight
+                  mr-auto
+                "
+                :href="route('courses.create')"
+                >Create new course</Link
+              >
+              <FilterSystem model="courses" :states="states" />
+            </div>
+          </template>
+        </CourseTable>
       </div>
     </div>
   </AppLayout>

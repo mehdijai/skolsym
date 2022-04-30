@@ -44,7 +44,10 @@ class TeacherController extends Controller
 
     public function view($id)
     {
-        $teacher = Teacher::find($id);
+        $teacher = Teacher::with(['courses' => function ($query) {
+            $query->with('teacher')->withCount('groups');
+            $query->selectSub('100', 'revenue');
+        }])->find($id);
 
         if (empty($teacher)) {
             abort(404, "This teacher doesn't exist in our records");
@@ -52,6 +55,7 @@ class TeacherController extends Controller
 
         return Inertia::render('Teacher/View', [
             'teacher' => $teacher,
+            'teachers' => Teacher::select(['id', 'name'])->withCount('courses')->where('id', '!=', $id)->get(),
         ]);
     }
 
@@ -121,7 +125,7 @@ class TeacherController extends Controller
 
         $teacher->save();
 
-        return redirect()->route('teachers.index');
+        return redirect()->back();
     }
 
     public function archive($id)
@@ -140,7 +144,7 @@ class TeacherController extends Controller
 
         $teacher->save();
 
-        return redirect()->route('teachers.index');
+        return redirect()->back();
     }
 
     public function delete(Request $request)

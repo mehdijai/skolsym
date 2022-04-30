@@ -65,7 +65,7 @@ class CourseController extends Controller
 
         Course::create($validator->validated());
 
-        return redirect()->route('courses.index');
+        return redirect()->back();
     }
 
     public function update($id)
@@ -121,7 +121,7 @@ class CourseController extends Controller
 
         $course->save();
 
-        return redirect()->route('courses.index');
+        return redirect()->back();
     }
 
     public function archive($id)
@@ -140,7 +140,7 @@ class CourseController extends Controller
 
         $course->save();
 
-        return redirect()->route('courses.index');
+        return redirect()->back();
     }
 
     public function delete(Request $request)
@@ -171,7 +171,7 @@ class CourseController extends Controller
 
         $this->remove($validated['id'], $validated['assign_to'], false);
 
-        return redirect()->route('courses.index');
+        return redirect()->back();
     }
 
     public function remove($id, $assign_groups_to = null, $hold = false)
