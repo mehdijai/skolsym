@@ -10,10 +10,10 @@ import RemoveCard from "@/Jetstream/RemoveCard.vue";
 import FilterSystem from "@/Jetstream/FilterSystem.vue";
 import { ref } from "@vue/reactivity";
 
-
 defineProps({
   teachers: Array,
   states: Object,
+  errors: Object,
 });
 
 const removeTeacher = ref(null);
@@ -122,6 +122,7 @@ const confirmDeletion = () => {
                 <th scope="col">Name</th>
                 <th scope="col">Email</th>
                 <th scope="col">Phone</th>
+                <th scope="col">Courses</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -139,7 +140,10 @@ const confirmDeletion = () => {
                 >
                   <td>
                     <div class="flex items-center">
-                      <Link class="font-bold" :href="route('teachers.view', [teacher.id])">
+                      <Link
+                        class="font-bold"
+                        :href="route('teachers.view', [teacher.id])"
+                      >
                         <p
                           class="
                             text-gray-900
@@ -178,6 +182,20 @@ const confirmDeletion = () => {
                       >
                         {{ teacher.phone }}
                       </a>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center">
+                      <Link
+                        :href="
+                          route('courses.index', { search: 'teacher:' + teacher.id })
+                        "
+                        class="font-semibold whitespace-no-wrap"
+                      >
+                        {{ teacher.courses_count }} course{{
+                          Number(teacher.courses_count) > 1 ? "s" : ""
+                        }}
+                      </Link>
                     </div>
                   </td>
                   <td>
@@ -281,7 +299,13 @@ const confirmDeletion = () => {
                               </Link>
                             </li>
                             <li>
-                              <Link :href="route('profile.show')">
+                              <Link
+                                :href="
+                                  route('courses.index', {
+                                    search: 'teacher:' + teacher.id,
+                                  })
+                                "
+                              >
                                 <span class="flex items-center">
                                   <span
                                     class="material-icons text-gray-400 text-xs"

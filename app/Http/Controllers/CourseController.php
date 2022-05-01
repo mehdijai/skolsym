@@ -16,6 +16,8 @@ class CourseController extends Controller
 {
     public function index()
     {
+        $allowed = ['teacher'];
+
         $query = Course::query()->with('teacher')->withCount('groups');
 
         if (in_array(request('filter'), StateLists::COURSE)) {
@@ -27,13 +29,20 @@ class CourseController extends Controller
         }
 
         if (request('search')) {
-            $query->where(function ($query) {
-                $query->whereRelation('teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('title', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('period', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('price', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('payment_type', 'LIKE', '%' . request('search') . '%');
-            });
+            if (strpos(request('search'), ':') !== false) {
+                $filter = explode(":", request('search'));
+                if (in_array($filter[0], $allowed)) {
+                    $query->whereRelation($filter[0], 'id', '=', $filter[1]);
+                }
+            } else {
+                $query->where(function ($query) {
+                    $query->whereRelation('teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('title', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('period', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('price', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('payment_type', 'LIKE', '%' . request('search') . '%');
+                });
+            }
         }
 
         return Inertia::render('Course/Show', [
@@ -65,7 +74,7 @@ class CourseController extends Controller
 
         Course::create($validator->validated());
 
-        return redirect()->back();
+        return redirect()->route('courses.index');
     }
 
     public function update($id)
@@ -121,7 +130,7 @@ class CourseController extends Controller
 
         $course->save();
 
-        return redirect()->back();
+        return redirect()->route('courses.index');
     }
 
     public function archive($id)
@@ -162,7 +171,7 @@ class CourseController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('courses.index')
+            return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -184,7 +193,7 @@ class CourseController extends Controller
             $group->archived = true;
             $group->archived_at = new DateTime();
 
-            if ($assign_groups_to != null && Rule::exists(Course::class, 'id')) {
+            if ($assign_groups_to != null) {
                 $group->course_id = $assign_groups_to;
             }
 

@@ -9,32 +9,28 @@ import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
-  courses: Array,
-  profile: {
-    type: Boolean,
-    default: false,
-  },
+  groups: Array,
 });
 
-const removeCourse = ref(null);
+const removeGroup = ref(null);
 
-const filteredCourses = (t) => {
-  return props.courses.filter(
-    (c) => c.id !== t.id && c.state == "active" && !t.archived
+const filteredGroups = (t) => {
+  return props.groups.filter(
+    (g) => g.id !== t.id && g.state == "active" && !t.archived
   );
 };
 
-const deleteCourse = (t) => {
-  removeCourse.value = t;
+const deleteGroup = (t) => {
+  removeGroup.value = t;
   form.id = t.id;
   form.assign_to =
-    t.groups_count > 0 && filteredCourses(t).length > 0
-      ? String(filteredCourses(t)[0].id)
+    t.groups_count > 0 && filteredGroups(t).length > 0
+      ? String(filteredGroups(t)[0].id)
       : null;
 };
 
 const cancelDeletion = () => {
-  removeCourse.value = null;
+  removeGroup.value = null;
   form.reset();
 };
 
@@ -44,32 +40,32 @@ const form = useForm({
 });
 
 const confirmDeletion = () => {
-  form.post(route("courses.delete"), {
+  form.post(route("groups.delete"), {
     onSuccess: () => cancelDeletion(),
   });
 };
 </script>
 <template>
   <RemoveCard
-    v-if="removeCourse !== null"
+    v-if="removeGroup !== null"
     @confirm="confirmDeletion"
     @cancel="cancelDeletion"
   >
     <template #content>
       <p class="text-gray-800 dark:text-gray-200 text-xl font-bold mt-4">
-        Remove {{ removeCourse.title }}
+        Remove {{ removeGroup.title }}
       </p>
       <p class="text-gray-600 dark:text-gray-400 text-xs py-2 px-6">
         Are you sure you want to delete this record ?
       </p>
       <div
         v-if="
-          removeCourse.groups_count > 0 &&
-          filteredCourses(removeCourse).length > 0
+          removeGroup.students_count > 0 &&
+          filteredGroups(removeGroup).length > 0
         "
         class="px-4 border-1 rounded"
       >
-        <JetLabel for="assign_to" value="Assign groups to a course" />
+        <JetLabel for="assign_to" value="Assign groups to a group" />
         <JetSelectInput
           id="assign_to"
           v-model="form.assign_to"
@@ -77,11 +73,11 @@ const confirmDeletion = () => {
         >
           <template #options>
             <template
-              v-for="(course, index) in filteredCourses(removeCourse)"
+              v-for="(group, index) in filteredGroups(removeGroup)"
               :key="'ts-' + index"
             >
-              <option :value="course.id">
-                {{ course.title }} ({{ course.groups_count }})
+              <option :value="group.id">
+                {{ group.title }} ({{ group.students_count }})
               </option>
             </template>
           </template>
@@ -93,29 +89,29 @@ const confirmDeletion = () => {
       </div>
     </template>
   </RemoveCard>
+
   <div class="sym-container">
     <slot name="header" />
     <table>
       <thead>
         <tr>
           <th scope="col">Title</th>
-          <th v-if="profile === false" scope="col">Teacher</th>
-          <th scope="col">Period</th>
-          <th scope="col">Price</th>
-          <th scope="col">Payment type</th>
-          <th scope="col">Groups</th>
+          <th scope="col">Course</th>
+          <th scope="col">Students</th>
           <th scope="col">State</th>
-          <th v-if="courses[0].revenue" scope="col">Revenue</th>
+          <th v-if="groups.length > 0 ? groups[0].revenue : false" scope="col">
+            Revenue
+          </th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <template v-for="course in courses" :key="course.id">
+        <template v-for="group in groups" :key="group.id">
           <tr
             :class="
-              course.state === 'removed'
+              group.state === 'removed'
                 ? 'bg-red-50'
-                : course.archived
+                : group.archived
                 ? 'bg-orange-50'
                 : 'bg-white'
             "
@@ -130,14 +126,18 @@ const confirmDeletion = () => {
                     whitespace-no-wrap
                   "
                 >
-                  {{ course.title }}
+                  {{ group.title }}
                 </p>
               </div>
             </td>
-            <td v-if="profile === false">
+            <td>
               <div class="flex items-center">
                 <Link
-                  :href="route('teachers.view', [course.teacher.id])"
+                  :href="
+                    route('groups.index', {
+                      search: 'course:' + group.course.id,
+                    })
+                  "
                   class="
                     text-cyan-600
                     hover:text-cyan-800
@@ -147,29 +147,16 @@ const confirmDeletion = () => {
                     font-semibold
                   "
                 >
-                  {{ course.teacher.name }}
-                  <span class="material-icons text-xs ml-1">open_in_new</span>
+                  {{ group.course.title }}
                 </Link>
               </div>
             </td>
             <td>
               <div class="flex items-center">
                 <p class="whitespace-no-wrap">
-                  {{ course.period }} week{{
-                    Number(course.period) > 1 ? "s" : ""
+                  {{ group.students_count }} student{{
+                    Number(group.students_count) > 1 ? "s" : ""
                   }}
-                </p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">{{ course.price }} DH</p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="capitalize whitespace-no-wrap">
-                  {{ course.payment_type }}
                 </p>
               </div>
             </td>
@@ -177,45 +164,31 @@ const confirmDeletion = () => {
               <div class="flex items-center">
                 <Link
                   :href="
-                    route('groups.index', { search: 'course:' + course.id })
-                  "
-                  class="font-semibold whitespace-no-wrap"
-                >
-                  {{ course.groups_count }} group{{
-                    Number(course.groups_count) > 1 ? "s" : ""
-                  }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('courses.index', {
+                    route('groups.index', {
                       filter:
-                        course.state === 'removed'
-                          ? course.state
-                          : course.archived
+                        group.state === 'removed'
+                          ? group.state
+                          : group.archived
                           ? 'archived'
-                          : course.state,
+                          : group.state,
                     })
                   "
                 >
                   <TagPill
                     :value="
-                      course.state === 'removed'
-                        ? course.state
-                        : course.archived
+                      group.state === 'removed'
+                        ? group.state
+                        : group.archived
                         ? 'archived'
-                        : course.state
+                        : group.state
                     "
                   />
                 </Link>
               </div>
             </td>
-            <td v-if="courses[0].revenue">
+            <td v-if="groups.length > 0 ? groups[0].revenue : false">
               <span class="font-semibold text-orange-700">
-                {{ course.revenue }} DH
+                {{ group.revenue }} DH
               </span>
             </td>
             <td>
@@ -248,9 +221,7 @@ const confirmDeletion = () => {
                       "
                     >
                       <li>
-                        <Link
-                          :href="route('courses.update', { id: course.id })"
-                        >
+                        <Link :href="route('groups.update', { id: group.id })">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >edit</span
@@ -261,7 +232,7 @@ const confirmDeletion = () => {
                       </li>
 
                       <li>
-                        <p @click="deleteCourse(course)">
+                        <p @click="deleteGroup(group)">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >delete</span
@@ -272,45 +243,37 @@ const confirmDeletion = () => {
                       </li>
 
                       <li>
-                        <Link :href="route('courses.archive', course.id)">
+                        <Link :href="route('groups.archive', group.id)">
                           <span class="flex items-center">
                             <span
                               class="material-icons text-gray-400 text-xs"
                               >{{
-                                course.archived ? "unarchive" : "inventory_2"
+                                group.archived ? "unarchive" : "inventory_2"
                               }}</span
                             >
                             <span class="ml-2">{{
-                              course.archived ? "Unarchive" : "Archive"
+                              group.archived ? "Unarchive" : "Archive"
                             }}</span>
                           </span>
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          :href="
-                            route('groups.index', {
-                              search: 'course:' + course.id,
-                            })
-                          "
-                        >
+                        <Link :href="route('profile.show')">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >list</span
                             >
-                            <span class="ml-2">Groups</span>
+                            <span class="ml-2">Students</span>
                           </span>
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          :href="route('groups.create', { course: course.id })"
-                        >
+                        <Link :href="route('profile.show')">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >add_circle</span
                             >
-                            <span class="ml-2">Add group</span>
+                            <span class="ml-2">Add student</span>
                           </span>
                         </Link>
                       </li>

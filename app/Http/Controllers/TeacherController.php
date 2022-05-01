@@ -125,7 +125,7 @@ class TeacherController extends Controller
 
         $teacher->save();
 
-        return redirect()->back();
+        return redirect()->route('teachers.index');
     }
 
     public function archive($id)

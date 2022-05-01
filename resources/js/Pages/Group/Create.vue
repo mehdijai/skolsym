@@ -13,50 +13,46 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   states: Object,
-  payment_types: Object,
-  teachers: Object,
+  courses: Object,
+  withCourse: [null, String],
   errors: Object,
-  withTeacher: [null, String],
-  course: {
+  group: {
     type: Object,
     default: null,
   },
 });
 
 const edit = computed(() => {
-  return props.course !== null;
+  return props.group !== null;
 });
 
 const form = useForm({
-  id: edit.value ? props.course.id : null,
-  title: edit.value ? props.course.title : "",
-  period: edit.value ? String(props.course.period) : "",
-  price: edit.value ? String(props.course.price) : "",
-  payment_type: edit.value ? props.course.payment_type : "monthly",
-  teacher_id: edit.value ? String(props.course.teacher_id) : props.withTeacher,
+  id: edit.value ? props.group.id : null,
+  title: edit.value ? props.group.title : "",
+  course_id: edit.value ? String(props.group.course_id) : props.withCourse,
   state: edit.value
-    ? props.course.state
+    ? props.group.state
     : props.states[Object.keys(props.states)[0]],
-  archived: edit.value ? Boolean(props.course.archived) : false,
+  archived: edit.value ? Boolean(props.group.archived) : false,
 });
 
 const submit = () => {
   if (edit.value === true) {
-    form.post(route("courses.edit"));
+    form.post(route("groups.edit"));
   } else {
-    form.post(route("courses.store"));
+    form.post(route("groups.store"));
   }
 };
 </script>
 
 <template>
-  <AppLayout :title="edit ? 'Update course' + course.title : 'Create course'">
+  <AppLayout :title="edit ? 'Update group' + group.title : 'Create group'">
     <template #header>
       <Breadcrumbs>
         <template #items>
           <li><Link :href="route('dashboard')">Dashboard</Link></li>
-          <li><Link :href="route('courses.index')">Courses</Link></li>
-          <li>{{ edit ? "Update " + course.title : "Create" }}</li>
+          <li><Link :href="route('groups.index')">Groups</Link></li>
+          <li>{{ edit ? "Update " + group.title : "Create" }}</li>
         </template>
       </Breadcrumbs>
     </template>
@@ -73,7 +69,7 @@ const submit = () => {
       <div class="py-4 mt-6">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
           {{
-            edit ? "Update " + course.title + "'s data" : "Create a new course"
+            edit ? "Update " + group.title + "'s data" : "Create a new group"
           }}
         </h2>
       </div>
@@ -91,29 +87,25 @@ const submit = () => {
       >
         <form @submit.prevent="submit">
           <div class="grid grid-cols-2 gap-4">
-
             <div>
-              <JetLabel for="teacher_id" value="Teacher" />
+              <JetLabel for="course_id" value="Course" />
               <JetSelectInput
-                id="teacher_id"
-                v-model="form.teacher_id"
+                id="course_id"
+                v-model="form.course_id"
                 class="mt-1 block w-full"
                 required
               >
                 <template #options>
-                  <template
-                    v-for="(teacher, index) in teachers"
-                    :key="index"
-                  >
-                    <option class="capitalize" :value="teacher.id">
-                      {{ teacher.name }}
+                  <template v-for="(course, index) in courses" :key="index">
+                    <option class="capitalize" :value="course.id">
+                      {{ course.title }}
                     </option>
                   </template>
                 </template>
               </JetSelectInput>
               <JetInputError
-                v-if="form.errors.teacher_id"
-                :message="form.errors.teacher_id"
+                v-if="form.errors.course_id"
+                :message="form.errors.course_id"
               />
             </div>
 
@@ -131,63 +123,6 @@ const submit = () => {
               <JetInputError
                 v-if="form.errors.title"
                 :message="form.errors.title"
-              />
-            </div>
-
-            <div>
-              <JetLabel for="period" value="Period in weeks" />
-              <JetInput
-                id="period"
-                v-model="form.period"
-                type="number"
-                class="mt-1 block w-full"
-                required
-                autocomplete="period"
-              />
-              <JetInputError
-                v-if="form.errors.period"
-                :message="form.errors.period"
-              />
-            </div>
-
-            <div>
-              <JetLabel for="price" value="Price" />
-              <JetInput
-                id="price"
-                v-model="form.price"
-                type="number"
-                class="mt-1 block w-full"
-                required
-                autocomplete="price"
-              />
-              <JetInputError
-                v-if="form.errors.price"
-                :message="form.errors.price"
-              />
-            </div>
-
-            <div>
-              <JetLabel for="payment_type" value="Payment type" />
-              <JetSelectInput
-                id="payment_type"
-                v-model="form.payment_type"
-                class="mt-1 block w-full"
-                required
-              >
-                <template #options>
-                  <template
-                    v-for="(payment_type, index) in payment_types"
-                    :key="index"
-                  >
-                    <option class="capitalize" :value="payment_type">
-                      {{ payment_type }}
-                    </option>
-                  </template>
-                </template>
-              </JetSelectInput>
-              <JetInputError
-                v-if="form.errors.payment_type"
-                :message="form.errors.payment_type"
               />
             </div>
 
@@ -213,7 +148,6 @@ const submit = () => {
               />
             </div>
           </div>
-
           <div v-if="edit" class="flex items-center mt-4">
             <Checkbox
               id="archive"
@@ -229,7 +163,7 @@ const submit = () => {
             <JetButtonSecondary
               class="mr-3"
               :disabled="form.processing"
-              @click="$inertia.get(route('courses.index'))"
+              @click="$inertia.get(route('groups.index'))"
             >
               Cancel
             </JetButtonSecondary>

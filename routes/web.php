@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -59,9 +60,15 @@ Route::middleware([
     });
 
     // Group Routes
-    Route::get('/groups', function () {
-        return Inertia::render('Dashboard');
-    })->name('groups.index');
+    Route::name('groups.')->prefix('groups')->group(function () {
+        Route::get('/', [GroupController::class, 'index'])->name('index');
+        Route::get('/create', [GroupController::class, 'create'])->name('create');
+        Route::post('/store', [GroupController::class, 'store'])->name('store');
+        Route::get('/update/{id}', [GroupController::class, 'update'])->name('update');
+        Route::post('/edit', [GroupController::class, 'edit'])->name('edit');
+        Route::get('/archive/{id}', [GroupController::class, 'archive'])->name('archive');
+        Route::post('/delete', [GroupController::class, 'delete'])->name("delete");
+    });
 
     // Student Routes
     Route::get('/students', function () {

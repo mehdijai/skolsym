@@ -13,6 +13,7 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   states: Object,
+  errors: Object,
   teacher: {
     type: Object,
     default: null,

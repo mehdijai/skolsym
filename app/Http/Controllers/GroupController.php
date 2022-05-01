@@ -3,40 +3,59 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Models\Course;
 use App\Models\Group;
+use App\Models\GroupStudent;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class GroupController extends Controller
 {
-    public function get_groups()
+    public function index()
     {
-        $query = Group::query()->where('state', 'active');
+        $allowed = ['course', 'course.teacher'];
 
-        if (request('archived')) {
+        $query = Group::query()->with('course')->withCount('students');
+
+        if (in_array(request('filter'), StateLists::GROUP)) {
+            $query->where('state', request('filter'));
+        }
+
+        if (request('filter') == 'archived') {
             $query->where('archived', true);
-        } else {
-            $query->where('archived', false);
         }
 
-        if (request('notActive')) {
-            $query->orWhere('state', '!=', 'active');
+        if (request('search')) {
+            if (strpos(request('search'), ':') !== false) {
+                $filter = explode(":", request('search'));
+                if (in_array($filter[0], $allowed)) {
+                    $query->whereRelation($filter[0], 'id', '=', $filter[1]);
+                }
+            } else {
+                $query->where(function ($query) {
+                    $query->whereRelation('course', 'title', 'LIKE', '%' . request('search') . '%')
+                        ->whereRelation('course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('title', 'LIKE', '%' . request('search') . '%');
+                });
+            }
         }
 
-        if (request('students')) {
-            $query->with('students');
-        }
-
-        $groups = $query->get();
-
-        return response()->json($groups, 200);
+        return Inertia::render('Group/Show', [
+            'groups' => $query->get(),
+            'states' => array_merge(['', 'archived'], array_values(StateLists::GROUP)),
+        ]);
     }
 
-    public function get_group($id)
+    public function create()
     {
-        return response()->json(Group::find($id), 200);
+        return Inertia::render('Group/Create', [
+            'states' => StateLists::GROUP,
+            'courses' => Course::where('archived', false)->get(),
+            'withCourse' => request('course') ?? null,
+        ]);
     }
 
     public function store(Request $request)
@@ -46,19 +65,22 @@ class GroupController extends Controller
             'title' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
+        Group::create($validator->validated());
 
-        $validated = $validator->validated();
+        return redirect()->route('groups.index');
+    }
 
-        $course = Group::create($validated);
-        return response()->json($course, 200);
+    public function update($id)
+    {
+        return Inertia::render('Group/Create', [
+            'states' => StateLists::GROUP,
+            'group' => Group::findOrFail($id),
+            'courses' => Course::where('archived', false)->get(),
+        ]);
     }
 
     public function edit(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'id' => 'required|numeric|exists:groups,id',
             'title' => 'required|string',
@@ -66,10 +88,6 @@ class GroupController extends Controller
             'state' => ['sometimes', 'nullable', Rule::in(StateLists::GROUP)],
             'archived' => 'sometimes|boolean',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
 
         $validated = $validator->validated();
 
@@ -84,12 +102,12 @@ class GroupController extends Controller
 
         if (array_key_exists('archived', $validated)) {
 
-            if ((bool) $validated["archived"] == true && $group->archived == false) {
+            if ($validated["archived"] == true) {
                 $group->archived = true;
                 $group->archived_at = new DateTime();
             }
 
-            if ((bool) $validated["archived"] == false && $group->archived == true) {
+            if ($validated["archived"] == false) {
                 $group->archived = false;
                 $group->archived_at = null;
             }
@@ -97,55 +115,68 @@ class GroupController extends Controller
 
         $group->save();
 
-        return response()->json($group, 200);
+        return redirect()->route('groups.index');
     }
 
-    public function delete($id)
+    public function archive($id)
     {
-        Group::query()->where('id', $id)->update([
-            'state' => StateLists::GROUP['REMOVED'],
-            'archived' => true,
-            'archived_at' => new DateTime(),
-        ]);
-    }
 
-    public function assign_student(Request $request){
+        $group = Group::find($id);
 
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|numeric|exists:students,id',
-            'group_id' => 'required|numeric|exists:groups,id'
-        ]);
+        if ($group->archived == true) {
 
-        if($validator->fails()){
-            return response()->json($validator->errors(), 401);
+            $group->archived = false;
+            $group->archived_at = null;
+        } else {
+            $group->archived = true;
+            $group->archived_at = new DateTime();
         }
 
-        $validated = $validator->validated();
+        $group->save();
 
-        $group = Group::find($validated["group_id"]);
-
-        $group->students()->attach($validated['student_id']);
-
-        return response()->json($group, 200);
+        return redirect()->back();
     }
 
-    public function detach_student(Request $request){
+    public function delete(Request $request)
+    {
 
         $validator = Validator::make($request->all(), [
-            'student_id' => 'required|numeric|exists:students,id',
-            'group_id' => 'required|numeric|exists:groups,id'
+            'id' => 'required|numeric|exists:courses,id',
+            'assign_to' => function ($value, $attribute) {
+                if ($value == null) {
+                    return [
+                        'nullable',
+                    ];
+                } else {
+                    return [
+                        'numeric',
+                        Rule::exists(Group::class, 'id'),
+                    ];
+                }
+            },
         ]);
 
-        if($validator->fails()){
-            return response()->json($validator->errors(), 401);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        $validated = $validator->validated();
+        $validated = $validator->validate();
 
-        $group = Group::find($validated["group_id"]);
+        if ($validated['assign_to'] != null) {
+            GroupStudent::where('group_id', $validated['did'])
+                ->update(['group_id' => $validated['id']]);
+        }
 
-        $group->students()->detach($validated['student_id']);
+        $group = Group::find($validated['id']);
 
-        return response()->json($group, 200);
+        $group->state = StateLists::GROUP['REMOVED'];
+        $group->archived = true;
+        $group->archived_at = new DateTime();
+
+        $group->save();
+
+        return redirect()->back();
     }
 }
