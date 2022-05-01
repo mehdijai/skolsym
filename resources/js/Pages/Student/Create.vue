@@ -13,49 +13,50 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   states: Object,
-  courses: Object,
-  student: Object,
-  withCourse: [null, String],
-  withStudent: [null, String],
+  group: Object,
+  withGroup: [null, String],
   errors: Object,
-  group: {
+  student: {
     type: Object,
     default: null,
   },
 });
 
 const edit = computed(() => {
-  return props.group !== null;
+  return props.student !== null;
 });
 
 const form = useForm({
-  id: edit.value ? props.group.id : null,
-  title: edit.value ? props.group.title : "",
-  course_id: edit.value ? String(props.group.course_id) : props.withCourse,
-  student_id: props.student ? props.student.id : null,
+  id: edit.value ? props.student.id : null,
+  name: edit.value ? props.student.name : "",
+  email: edit.value ? props.student.email : "",
+  phone: edit.value ? props.student.phone : "",
+  age: String(edit.value) ? String(props.student.age) : "",
+  grade: edit.value ? props.student.grade : "",
   state: edit.value
-    ? props.group.state
+    ? props.student.state
     : props.states[Object.keys(props.states)[0]],
-  archived: edit.value ? Boolean(props.group.archived) : false,
+  archived: edit.value ? Boolean(props.student.archived) : false,
+  group_id: props.group ? props.group.id : null,
 });
 
 const submit = () => {
   if (edit.value === true) {
-    form.post(route("groups.edit"));
+    form.post(route("students.edit"));
   } else {
-    form.post(route("groups.store"));
+    form.post(route("students.store"));
   }
 };
 </script>
 
 <template>
-  <AppLayout :title="edit ? 'Update group' + group.title : 'Create group'">
+  <AppLayout :title="edit ? 'Update student' + student.name : 'Create student'">
     <template #header>
       <Breadcrumbs>
         <template #items>
           <li><Link :href="route('dashboard')">Dashboard</Link></li>
-          <li><Link :href="route('groups.index')">Groups</Link></li>
-          <li>{{ edit ? "Update " + group.title : "Create" }}</li>
+          <li><Link :href="route('students.index')">Students</Link></li>
+          <li>{{ edit ? "Update " + student.name : "Create" }}</li>
         </template>
       </Breadcrumbs>
     </template>
@@ -72,7 +73,7 @@ const submit = () => {
       <div class="py-4 mt-6">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
           {{
-            edit ? "Update " + group.title + "'s data" : "Create a new group"
+            edit ? "Update " + student.name + "'s data" : "Create a new student"
           }}
         </h2>
       </div>
@@ -91,41 +92,87 @@ const submit = () => {
         <form @submit.prevent="submit">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <JetLabel for="course_id" value="Course" />
-              <JetSelectInput
-                id="course_id"
-                v-model="form.course_id"
-                class="mt-1 block w-full"
-                required
-              >
-                <template #options>
-                  <template v-for="(course, index) in courses" :key="index">
-                    <option class="capitalize" :value="course.id">
-                      {{ course.title }}
-                    </option>
-                  </template>
-                </template>
-              </JetSelectInput>
-              <JetInputError
-                v-if="form.errors.course_id"
-                :message="form.errors.course_id"
-              />
-            </div>
-
-            <div>
-              <JetLabel for="title" value="Title" />
+              <JetLabel for="name" value="Name" />
               <JetInput
-                id="title"
-                v-model="form.title"
+                id="name"
+                v-model="form.name"
                 type="text"
                 class="mt-1 block w-full"
                 required
                 autofocus
-                autocomplete="title"
+                autocomplete="name"
               />
               <JetInputError
-                v-if="form.errors.title"
-                :message="form.errors.title"
+                v-if="form.errors.name"
+                :message="form.errors.name"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="email" value="Email" />
+              <JetInput
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="mt-1 block w-full"
+                required
+                autofocus
+                autocomplete="email"
+              />
+              <JetInputError
+                v-if="form.errors.email"
+                :message="form.errors.email"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="phone" value="Phone" />
+              <JetInput
+                id="phone"
+                v-model="form.phone"
+                type="tel"
+                class="mt-1 block w-full"
+                required
+                autofocus
+                autocomplete="phone"
+              />
+              <JetInputError
+                v-if="form.errors.phone"
+                :message="form.errors.phone"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="age" value="Age" />
+              <JetInput
+                id="age"
+                v-model="form.age"
+                type="number"
+                class="mt-1 block w-full"
+                required
+                autofocus
+                autocomplete="age"
+              />
+              <JetInputError
+                v-if="form.errors.age"
+                :message="form.errors.age"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="grade" value="Grade" />
+              <JetInput
+                id="grade"
+                v-model="form.grade"
+                type="text"
+                class="mt-1 block w-full"
+                required
+                autofocus
+                autocomplete="grade"
+              />
+              <JetInputError
+                v-if="form.errors.grade"
+                :message="form.errors.grade"
               />
             </div>
 
@@ -150,12 +197,11 @@ const submit = () => {
                 :message="form.errors.state"
               />
             </div>
-
-            <div v-if="withStudent">
-              <JetLabel for="student" value="Attached student" />
+            <div v-if="withGroup">
+              <JetLabel for="group" value="Attached group" />
               <JetInput
-                id="student"
-                :value="student.name"
+                id="group"
+                :value="group.title"
                 type="text"
                 class="mt-1 block w-full"
                 required

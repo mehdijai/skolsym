@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -71,9 +72,15 @@ Route::middleware([
     });
 
     // Student Routes
-    Route::get('/students', function () {
-        return Inertia::render('Dashboard');
-    })->name('students.index');
+    Route::name('students.')->prefix('students')->group(function () {
+        Route::get('/', [StudentController::class, 'index'])->name('index');
+        Route::get('/create', [StudentController::class, 'create'])->name('create');
+        Route::post('/store', [StudentController::class, 'store'])->name('store');
+        Route::get('/update/{id}', [StudentController::class, 'update'])->name('update');
+        Route::post('/edit', [StudentController::class, 'edit'])->name('edit');
+        Route::get('/archive/{id}', [StudentController::class, 'archive'])->name('archive');
+        Route::post('/delete', [StudentController::class, 'delete'])->name("delete");
+    });
 
     // Payment Routes
     Route::get('/payments', function () {

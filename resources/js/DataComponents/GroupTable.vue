@@ -118,14 +118,7 @@ const confirmDeletion = () => {
           >
             <td>
               <div class="flex items-center">
-                <p
-                  class="
-                    font-bold
-                    text-gray-900
-                    hover:text-gray-500
-                    whitespace-no-wrap
-                  "
-                >
+                <p class="font-bold text-gray-900 whitespace-no-wrap">
                   {{ group.title }}
                 </p>
               </div>
@@ -153,11 +146,16 @@ const confirmDeletion = () => {
             </td>
             <td>
               <div class="flex items-center">
-                <p class="whitespace-no-wrap">
+                <Link
+                  :href="
+                    route('students.index', { search: 'groups:' + group.id })
+                  "
+                  class="font-semibold whitespace-no-wrap"
+                >
                   {{ group.students_count }} student{{
                     Number(group.students_count) > 1 ? "s" : ""
                   }}
-                </p>
+                </Link>
               </div>
             </td>
             <td>
@@ -258,7 +256,7 @@ const confirmDeletion = () => {
                         </Link>
                       </li>
                       <li>
-                        <Link :href="route('profile.show')">
+                        <Link :href="route('students.index', { search: 'groups:' + group.id })">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >list</span

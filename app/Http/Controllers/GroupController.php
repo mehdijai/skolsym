@@ -6,6 +6,7 @@ use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupStudent;
+use App\Models\Student;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -16,9 +17,24 @@ class GroupController extends Controller
 {
     public function index()
     {
-        $allowed = ['course', 'course.teacher'];
+        $allowed = ['course', 'course.teacher', 'students'];
 
         $query = Group::query()->with('course')->withCount('students');
+
+        if (request('search')) {
+            if (strpos(request('search'), ':') !== false) {
+                $filter = explode(":", request('search'));
+                if (in_array($filter[0], $allowed)) {
+                    $query->whereRelation($filter[0], $filter[0] == 'students' ? 'student_id' : 'id', '=', $filter[1]);
+                }
+            } else {
+                $query->where(function ($query) {
+                    $query->whereRelation('course', 'title', 'LIKE', '%' . request('search') . '%')
+                        ->orWhereRelation('course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhere('title', 'LIKE', '%' . request('search') . '%');
+                });
+            }
+        }
 
         if (in_array(request('filter'), StateLists::GROUP)) {
             $query->where('state', request('filter'));
@@ -26,21 +42,6 @@ class GroupController extends Controller
 
         if (request('filter') == 'archived') {
             $query->where('archived', true);
-        }
-
-        if (request('search')) {
-            if (strpos(request('search'), ':') !== false) {
-                $filter = explode(":", request('search'));
-                if (in_array($filter[0], $allowed)) {
-                    $query->whereRelation($filter[0], 'id', '=', $filter[1]);
-                }
-            } else {
-                $query->where(function ($query) {
-                    $query->whereRelation('course', 'title', 'LIKE', '%' . request('search') . '%')
-                        ->whereRelation('course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('title', 'LIKE', '%' . request('search') . '%');
-                });
-            }
         }
 
         return Inertia::render('Group/Show', [
@@ -54,7 +55,9 @@ class GroupController extends Controller
         return Inertia::render('Group/Create', [
             'states' => StateLists::GROUP,
             'courses' => Course::where('archived', false)->get(),
+            'student' => request('student') ? Student::find(request('student')) : null,
             'withCourse' => request('course') ?? null,
+            'withStudent' => request('student') ?? null,
         ]);
     }
 
@@ -62,10 +65,20 @@ class GroupController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'course_id' => 'required|numeric|exists:courses,id',
+            'student_id' => 'sometimes|numeric|exists:students,id',
             'title' => 'required|string',
         ]);
 
-        Group::create($validator->validated());
+        $validated = $validator->validate();
+
+        $group = new Group();
+        $group->course_id = $validated['course_id'];
+        $group->title = $validated['title'];
+        $group->save();
+
+        if ($validated['student_id'] !== null) {
+            $group->students()->attach($validated['student_id']);
+        }
 
         return redirect()->route('groups.index');
     }
@@ -141,7 +154,7 @@ class GroupController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:courses,id',
+            'id' => 'required|numeric|exists:groups,id',
             'assign_to' => function ($value, $attribute) {
                 if ($value == null) {
                     return [
