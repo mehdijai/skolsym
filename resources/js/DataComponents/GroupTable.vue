@@ -10,6 +10,7 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   groups: Array,
+  style: Object,
 });
 
 const removeGroup = ref(null);
@@ -90,7 +91,7 @@ const confirmDeletion = () => {
     </template>
   </RemoveCard>
 
-  <div class="sym-container">
+  <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
       <thead>
@@ -219,6 +220,33 @@ const confirmDeletion = () => {
                       "
                     >
                       <li>
+                        <Link :href="route('profile.show')">
+                          <span class="flex items-center">
+                            <span class="material-icons text-gray-400 text-xs"
+                              >add_circle</span
+                            >
+                            <span class="ml-2">Add student</span>
+                          </span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          :href="
+                            route('students.index', {
+                              search: 'groups:' + group.id,
+                            })
+                          "
+                        >
+                          <span class="flex items-center">
+                            <span class="material-icons text-gray-400 text-xs"
+                              >list</span
+                            >
+                            <span class="ml-2">Students</span>
+                          </span>
+                        </Link>
+                      </li>
+
+                      <li>
                         <Link :href="route('groups.update', { id: group.id })">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
@@ -252,26 +280,6 @@ const confirmDeletion = () => {
                             <span class="ml-2">{{
                               group.archived ? "Unarchive" : "Archive"
                             }}</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link :href="route('students.index', { search: 'groups:' + group.id })">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >list</span
-                            >
-                            <span class="ml-2">Students</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link :href="route('profile.show')">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >add_circle</span
-                            >
-                            <span class="ml-2">Add student</span>
                           </span>
                         </Link>
                       </li>

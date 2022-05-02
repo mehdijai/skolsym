@@ -10,6 +10,7 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   courses: Array,
+  style: Object,
   profile: {
     type: Boolean,
     default: false,
@@ -93,7 +94,7 @@ const confirmDeletion = () => {
       </div>
     </template>
   </RemoveCard>
-  <div class="sym-container">
+  <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
       <thead>
@@ -105,7 +106,7 @@ const confirmDeletion = () => {
           <th scope="col">Payment type</th>
           <th scope="col">Groups</th>
           <th scope="col">State</th>
-          <th v-if="courses[0].revenue" scope="col">Revenue</th>
+          <th v-if="courses.length > 0 ? courses[0].revenue : false" scope="col">Revenue</th>
           <th scope="col">Actions</th>
         </tr>
       </thead>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Const\StateLists;
 use App\Models\Course;
+use App\Models\Group;
+use App\Models\Student;
 use App\Models\Teacher;
 use DateTime;
 use Illuminate\Http\Request;
@@ -44,10 +46,14 @@ class TeacherController extends Controller
 
     public function view($id)
     {
-        $teacher = Teacher::with(['courses' => function ($query) {
-            $query->with('teacher')->withCount('groups');
-            $query->selectSub('100', 'revenue');
-        }])->find($id);
+        $teacher = Teacher::with([
+            'courses' => function ($query) {
+                $query->with('teacher');
+                $query->withCount('groups');
+                $query->selectSub('100', 'revenue');
+            },
+        ])
+        ->find($id);
 
         if (empty($teacher)) {
             abort(404, "This teacher doesn't exist in our records");
@@ -56,6 +62,8 @@ class TeacherController extends Controller
         return Inertia::render('Teacher/View', [
             'teacher' => $teacher,
             'teachers' => Teacher::select(['id', 'name'])->withCount('courses')->where('id', '!=', $id)->get(),
+            'groups' => Group::query()->with('course')->whereRelation('course.teacher', 'id', $id)->withCount('students')->get(),
+            'students' => Student::query()->with('groups')->whereRelation('groups.course.teacher', 'id', $id)->get(),
         ]);
     }
 

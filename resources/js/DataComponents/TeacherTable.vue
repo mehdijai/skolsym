@@ -11,6 +11,7 @@ import { computed } from "@vue/runtime-core";
 const props = defineProps({
   teachers: Array,
   errors: Object,
+  style: Object,
 });
 
 const removeTeacher = ref(null);
@@ -78,7 +79,7 @@ const confirmDeletion = () => {
     </template>
   </RemoveCard>
 
-  <div class="sym-container">
+  <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
       <thead>

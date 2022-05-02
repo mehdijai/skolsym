@@ -10,6 +10,7 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   students: Array,
+  style: Object,
 });
 
 const removeStudent = ref(null);
@@ -56,7 +57,7 @@ const confirmDeletion = () => {
     </template>
   </RemoveCard>
 
-  <div class="sym-container">
+  <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
       <thead>
@@ -194,6 +195,36 @@ const confirmDeletion = () => {
                     >
                       <li>
                         <Link
+                          :href="
+                            route('groups.create', { student: student.id })
+                          "
+                        >
+                          <span class="flex items-center">
+                            <span class="material-icons text-gray-400 text-xs"
+                              >add_circle</span
+                            >
+                            <span class="ml-2">Add group</span>
+                          </span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          :href="
+                            route('groups.index', {
+                              search: 'students:' + student.id,
+                            })
+                          "
+                        >
+                          <span class="flex items-center">
+                            <span class="material-icons text-gray-400 text-xs"
+                              >list</span
+                            >
+                            <span class="ml-2">Groups</span>
+                          </span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
                           :href="route('students.update', { id: student.id })"
                         >
                           <span class="flex items-center">
@@ -227,26 +258,6 @@ const confirmDeletion = () => {
                             <span class="ml-2">{{
                               student.archived ? "Unarchive" : "Archive"
                             }}</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link :href="route('groups.index', { search: 'students:' + student.id })">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >list</span
-                            >
-                            <span class="ml-2">Groups</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link :href="route('groups.create', {student: student.id})">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >add_circle</span
-                            >
-                            <span class="ml-2">Add group</span>
                           </span>
                         </Link>
                       </li>
