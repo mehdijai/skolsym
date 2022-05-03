@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
 use DateTime;
@@ -24,6 +25,8 @@ class StudentController extends Controller
                 $filter = explode(":", request('search'));
                 if (in_array($filter[0], $allowed)) {
                     $query->whereRelation($filter[0], $filter[0] == 'groups' ? 'group_id' : 'id', $filter[1]);
+                } else if ($filter[0] === 'student') {
+                    $query->where('id', $filter[1]);
                 }
             } else {
                 $query->where(function ($query) {
@@ -57,7 +60,18 @@ class StudentController extends Controller
     {
         return Inertia::render('Student/Create', [
             'states' => StateLists::STUDENT,
-            'group' => request('group') ? Group::find(request('group')) : null,
+            'courses' => Course::query()
+                ->where('archived', false)
+                ->select('id', 'title', 'teacher_id')
+                ->with([
+                    'groups' => function ($query) {
+                        $query->where('archived', false)->select('id', 'title', 'course_id');
+                    },
+                    'teacher' => function ($query) {
+                        $query->select('id', 'name');
+                    },
+                ])
+                ->get(),
             'withGroup' => request('group') ?? null,
         ]);
     }
@@ -66,16 +80,18 @@ class StudentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:50|min:4',
-            'email' => 'required|email|unique:students',
+            'email' => 'required|email|unique:students,email',
             'phone' => 'required|string',
             'age' => 'sometimes|numeric',
             'grade' => 'sometimes|string',
-            'group_id' => 'sometimes|numeric|exists:groups,id',
+            'groups' => 'array',
         ]);
+
+        session()->flash($validator->errors());
 
         $validated = $validator->validate();
 
-        $student = new Group();
+        $student = new Student();
         $student->name = $validated['name'];
         $student->email = $validated['email'];
         $student->phone = $validated['phone'];
@@ -83,8 +99,8 @@ class StudentController extends Controller
         $student->grade = $validated['grade'];
         $student->save();
 
-        if ($validated['group_id'] !== null) {
-            $student->groups()->attach($validated['group_id']);
+        if ($validated['groups'] !== null) {
+            $student->groups()->attach($validated['groups']);
         }
 
         return redirect()->route('students.index');
@@ -93,8 +109,21 @@ class StudentController extends Controller
     public function update($id)
     {
         return Inertia::render('Student/Create', [
+            'student' => Student::with(['groups' => fn($q) => $q->select('groups.id', 'groups.course_id')])->findOrFail($id),
             'states' => StateLists::STUDENT,
-            'student' => Student::findOrFail($id),
+            'courses' => Course::query()
+                ->where('archived', false)
+                ->select('id', 'title', 'teacher_id')
+                ->with([
+                    'groups' => function ($query) {
+                        $query->where('archived', false)->select('id', 'title', 'course_id');
+                    },
+                    'teacher' => function ($query) {
+                        $query->select('id', 'name');
+                    },
+                ])
+                ->get(),
+            'withGroup' => request('group') ?? null,
         ]);
     }
 
@@ -102,14 +131,15 @@ class StudentController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:teachers,id',
+            'id' => 'required|numeric|exists:students,id',
             'name' => 'required|max:50|min:4',
-            'email' => 'required|email',
+            'email' => ['required', 'email', 'unique:students,email,' . $request->id],
             'phone' => 'required|string',
             'age' => 'sometimes|numeric',
             'grade' => 'sometimes|string',
             'state' => ['sometimes', 'nullable', Rule::in(StateLists::STUDENT)],
             'archived' => 'sometimes|boolean',
+            'groups' => 'array',
         ]);
 
         $validated = $validator->validated();
@@ -140,6 +170,11 @@ class StudentController extends Controller
         }
 
         $student->save();
+
+        if ($validated['groups'] !== null) {
+            $student->groups()->detach();
+            $student->groups()->attach($validated['groups']);
+        }
 
         return redirect()->route('students.index');
     }

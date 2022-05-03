@@ -45,7 +45,7 @@ const confirmDeletion = () => {
 };
 
 const tab = computed(() => {
-  return window.location.hash.replace('#', '') ?? "courses"
+  return window.location.hash != '' ? window.location.hash.replace('#', '') : "courses"
 })
 
 </script>

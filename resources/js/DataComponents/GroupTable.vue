@@ -219,8 +219,8 @@ const confirmDeletion = () => {
                         w-52
                       "
                     >
-                      <li>
-                        <Link :href="route('profile.show')">
+                      <li v-if="!group.archived">
+                        <Link :href="route('students.create', {group: group.id})">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >add_circle</span

@@ -26,6 +26,8 @@ class GroupController extends Controller
                 $filter = explode(":", request('search'));
                 if (in_array($filter[0], $allowed)) {
                     $query->whereRelation($filter[0], $filter[0] == 'students' ? 'student_id' : 'id', '=', $filter[1]);
+                }else if($filter[0] === 'group'){
+                    $query->where('id', $filter[1]);
                 }
             } else {
                 $query->where(function ($query) {
