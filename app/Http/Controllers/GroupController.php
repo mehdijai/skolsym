@@ -9,6 +9,7 @@ use App\Models\GroupStudent;
 use App\Models\Student;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -75,9 +76,15 @@ class GroupController extends Controller
 
         $validated = $validator->validate();
 
+        $course = Course::select('title')->findOrFail($validated['course_id']);
+        $title = explode(' ', $course->title);
+        $prefix = join('',  array_map(fn($chunk) => $chunk[0], $title));
+        
+        $group_title = strtoupper($prefix . '_' . $validated['title']);
+
         $group = new Group();
         $group->course_id = $validated['course_id'];
-        $group->title = $validated['title'];
+        $group->title = $group_title;
         $group->save();
 
         if ($validated['students'] !== null) {
