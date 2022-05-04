@@ -17,11 +17,27 @@ const props = defineProps({
   },
 });
 
-const allChecked = ref(false);
+const isAllChecked = () => {
+  if (!!props.courses) {
+    return props.courses.every((c) => {
+      c.checked == true && c.groups.every((g) => g.checked == true)
+    });
+  }
+  if (!!props.students) {
+    return props.students.every((s) => s.checked == true);
+  }
+  if (!!props.groups) {
+    return props.groups.every((g) => g.checked == true);
+  }
+
+  return false
+};
+
+const allChecked = ref(isAllChecked());
 
 watch(allChecked, () => {
   if (allChecked.value === true) {
-    if (props.courses !== null) {
+    if (!!props.courses) {
       props.courses.map((c) => {
         if (c.groups.length > 0) {
           c.checked = true;
@@ -34,13 +50,13 @@ watch(allChecked, () => {
         return c;
       });
     }
-    if (props.students !== null) {
+    if (!!props.students) {
       props.students.map((s) => {
         s.checked = true;
         return s;
       });
     }
-    if (props.groups !== null) {
+    if (!!props.groups) {
       props.groups.map((g) => {
         g.checked = true;
         return g;
@@ -75,13 +91,15 @@ watch(allChecked, () => {
   }
 });
 
-watchEffect(() => {
-  props.courses.map((c) => {
-    if (c.groups.find((g) => g.checked === true) === undefined) {
-      c.checked = false;
-    }
+if (props.courses != null) {
+  watch(props.courses, () => {
+    props.courses.map((c) => {
+      if (c.groups.find((g) => g.checked === true) === undefined) {
+        c.checked = false;
+      }
+    });
   });
-});
+}
 </script>
 <template>
   <div class="overflow-x-auto w-full">

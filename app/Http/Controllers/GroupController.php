@@ -26,7 +26,7 @@ class GroupController extends Controller
                 $filter = explode(":", request('search'));
                 if (in_array($filter[0], $allowed)) {
                     $query->whereRelation($filter[0], $filter[0] == 'students' ? 'student_id' : 'id', '=', $filter[1]);
-                }else if($filter[0] === 'group'){
+                } else if ($filter[0] === 'group') {
                     $query->where('id', $filter[1]);
                 }
             } else {
@@ -57,7 +57,9 @@ class GroupController extends Controller
         return Inertia::render('Group/Create', [
             'states' => StateLists::GROUP,
             'courses' => Course::where('archived', false)->get(),
-            'student' => request('student') ? Student::find(request('student')) : null,
+            'students' => Student::where('archived', false)
+                ->select('id', 'name', 'email')
+                ->get(),
             'withCourse' => request('course') ?? null,
             'withStudent' => request('student') ?? null,
         ]);
@@ -67,8 +69,8 @@ class GroupController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'course_id' => 'required|numeric|exists:courses,id',
-            'student_id' => 'sometimes|numeric|exists:students,id',
             'title' => 'required|string',
+            'students' => 'array',
         ]);
 
         $validated = $validator->validate();
@@ -78,8 +80,8 @@ class GroupController extends Controller
         $group->title = $validated['title'];
         $group->save();
 
-        if ($validated['student_id'] !== null) {
-            $group->students()->attach($validated['student_id']);
+        if ($validated['students'] !== null) {
+            $group->students()->attach($validated['students']);
         }
 
         return redirect()->route('groups.index');
@@ -89,8 +91,11 @@ class GroupController extends Controller
     {
         return Inertia::render('Group/Create', [
             'states' => StateLists::GROUP,
-            'group' => Group::findOrFail($id),
+            'group' => Group::with(['students' => fn($q) => $q->select('students.id')])->findOrFail($id),
             'courses' => Course::where('archived', false)->get(),
+            'students' => Student::where('archived', false)
+                ->select('id', 'name', 'email')
+                ->get(),
         ]);
     }
 
@@ -102,6 +107,7 @@ class GroupController extends Controller
             'course_id' => 'sometimes|required|numeric|exists:courses,id',
             'state' => ['sometimes', 'nullable', Rule::in(StateLists::GROUP)],
             'archived' => 'sometimes|boolean',
+            'students' => 'array',
         ]);
 
         $validated = $validator->validated();
@@ -129,6 +135,11 @@ class GroupController extends Controller
         }
 
         $group->save();
+
+        if ($validated['students'] !== null) {
+            $group->students()->detach();
+            $group->students()->attach($validated['students']);
+        }
 
         return redirect()->route('groups.index');
     }

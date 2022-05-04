@@ -24,13 +24,13 @@ const props = defineProps({
 });
 
 const edit = computed(() => {
-  return props.student !== null;
+  return !!props.student;
 });
 
 const AttachedCourses = reactive(
   props.courses.map((c) => {
     c.checked =
-      props.withGroup !== null
+      !!props.withGroup
         ? c.groups.find((g) => g.id === Number(props.withGroup)) !== undefined
         : edit.value
         ? props.student.groups.map((gs) => gs.course_id).includes(c.id)
@@ -38,7 +38,7 @@ const AttachedCourses = reactive(
 
     c.groups.map((g) => {
       g.checked =
-        props.withGroup !== null
+        !!props.withGroup
           ? g.id === Number(props.withGroup)
           : edit.value
           ? props.student.groups.map((gs) => gs.id).includes(g.id)
