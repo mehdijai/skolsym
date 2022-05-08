@@ -23,23 +23,18 @@ class Course extends Model
         'archived_at',
     ];
 
-    /**
-     * Get all of the comments for the Course
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class, 'course_id', 'id');
     }
 
-    /**
-     * Get the user that owns the Course
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'course_id', 'id');
     }
 }

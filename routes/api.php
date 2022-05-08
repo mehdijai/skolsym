@@ -54,7 +54,7 @@ Route::prefix('groups')->name('groups.')->group(function () {
 
 // // Student Routes
 Route::prefix('students')->name('students.')->group(function () {
-    Route::get('/', [StudentController::class, 'get_students'])->name("all");
+    Route::get('/', [StudentController::class, 'index'])->name("all");
     // Route::get('/{id}', [StudentController::class, 'get_student'])->name("find");
     // Route::post('/create', [StudentController::class, 'store'])->name("create");
     // Route::post('/edit', [StudentController::class, 'edit'])->name("edit");

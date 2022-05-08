@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Const\StateLists;
 use App\Models\Course;
-use App\Models\Group;
 use App\Models\Student;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +18,9 @@ class StudentController extends Controller
     {
         $allowed = ['groups', 'groups.course', 'groups.course.teacher'];
 
-        $query = Student::query()->with('groups');
+        $query = Student::query()->with('groups.course.payments', function($q){
+            $q->latest();
+        });
 
         if (request('search')) {
             if (strpos(request('search'), ':') !== false) {
@@ -33,6 +35,7 @@ class StudentController extends Controller
                     $query->whereRelation('groups', 'title', 'LIKE', '%' . request('search') . '%')
                         ->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
                         ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                        ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
                         ->orWhere('name', 'LIKE', '%' . request('search') . '%')
                         ->orWhere('email', 'LIKE', '%' . request('search') . '%')
                         ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
@@ -43,12 +46,18 @@ class StudentController extends Controller
         }
 
         if (in_array(request('filter'), StateLists::STUDENT)) {
-            $query->where('state', request('filter'));
+            $query->where('state', request('filter'))->orWhereRelation('payments', 'state', request('filter'));
         }
 
         if (request('filter') == 'archived') {
             $query->where('archived', true);
         }
+
+        $query->with(['payments' => function ($q) {
+            $q->where('created_at', '>=', Carbon::now()->subMonth())->with('course', function($c){
+                $c->select('id', 'price');
+            })->latest()->first();
+        }]);
 
         return Inertia::render('Student/Show', [
             'students' => $query->get(),

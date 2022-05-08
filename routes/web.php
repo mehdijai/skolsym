@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
+use App\Models\Course;
+use App\Models\Payment;
+use App\Models\Student;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -83,9 +87,13 @@ Route::middleware([
     });
 
     // Payment Routes
-    Route::get('/payments', function () {
-        return Inertia::render('Dashboard');
-    })->name('payments.index');
+    Route::name('payments.')->prefix('payments')->group(function () {
+        Route::get('/', function () {
+            $student = Student::first();
+            dd(Payment::get_status($student, $student->groups()->first()->course));
+        })->name('index');
+        Route::post('/store', [PaymentController::class, 'store'])->name('store');
+    });
 
     // Accounting Routes
     Route::get('/accounting', function () {

@@ -66,7 +66,7 @@ const submit = () => {
 </script>
 
 <template>
-  <AppLayout :title="edit ? 'Update group' + group.title : 'Create group'">
+  <AppLayout :title="edit ? 'Update group ' + group.title : 'Create group'">
     <template #header>
       <Breadcrumbs>
         <template #items>

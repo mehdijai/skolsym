@@ -5,8 +5,9 @@ import RemoveCard from "@/Jetstream/RemoveCard.vue";
 import JetSelectInput from "@/Jetstream/SelectInput.vue";
 import JetLabel from "@/Jetstream/Label.vue";
 import JetInputError from "@/Jetstream/InputError.vue";
-import { ref } from "@vue/reactivity";
-import { computed } from "@vue/runtime-core";
+import { reactive, ref } from "@vue/reactivity";
+import { computed, onMounted } from "@vue/runtime-core";
+import Checkbox from "@/Jetstream/Checkbox.vue";
 
 const props = defineProps({
   students: Array,
@@ -40,6 +41,61 @@ const confirmDeletion = () => {
     onSuccess: () => cancelDeletion(),
   });
 };
+
+const payForm = useForm({
+  student_id: null,
+  courses: [],
+});
+
+const paying = ref(null);
+const attachedCourses = ref(null);
+
+function getCourses(student) {
+  let courses = [];
+
+  student.groups.forEach((group) => {
+    if (courses.find((c) => c.id == group.course.id) === undefined) {
+      group.course.checked = false;
+      courses.push(group.course);
+    }
+  });
+
+  return courses;
+}
+
+const pay = (student) => {
+  paying.value = student;
+  payForm.student_id = student.id;
+  attachedCourses.value = getCourses(student);
+};
+
+const cancelPay = () => {
+  paying.value = null;
+  payForm.student_id = null;
+  payForm.courses = [];
+};
+
+const confirmPay = () => {
+  payForm.courses = attachedCourses.value.filter((c) => c.checked == true);
+  payForm.post(route("payments.store"), {
+    onSuccess: () => {
+      payForm.reset();
+      paying.value = null;
+    },
+  });
+};
+
+onMounted(() => {
+  props.students.forEach((student) => {
+    const targetEl = document.getElementById("dropdown-" + student.id);
+
+    const triggerEl = document.getElementById("dropdownDefault-" + student.id);
+
+    new Dropdown(targetEl, triggerEl, {
+      placement: "bottom",
+    });
+  });
+});
 </script>
 <template>
   <RemoveCard
@@ -57,6 +113,126 @@ const confirmDeletion = () => {
     </template>
   </RemoveCard>
 
+  <div
+    v-if="paying != null"
+    class="
+      overflow-y-auto overflow-x-hidden
+      fixed
+      z-50
+      top-1/2
+      left-1/2
+      -translate-x-1/2 -translate-y-1/2
+    "
+  >
+    <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <button
+          type="button"
+          class="
+            mx-2
+            my-2
+            float-right
+            text-gray-400
+            bg-transparent
+            hover:bg-gray-200 hover:text-gray-900
+            rounded-lg
+            text-sm
+            p-1.5
+            ml-auto
+            inline-flex
+            items-center
+            dark:hover:bg-gray-800 dark:hover:text-white
+          "
+          @click="cancelPay"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+        <div class="p-6 text-center">
+          <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            This student "{{ paying.name }}" has multiple courses! Please check
+            payed courses.
+          </h3>
+          <div class="p-2 bg-gray-50 rounded mb-5">
+            <template v-for="course in attachedCourses" :key="course.id">
+              <div class="block my-2 flex gap-4 items-center">
+                <Checkbox
+                  :name="'pay_group_' + course.id"
+                  v-model="course.checked"
+                  :checked="course.checked"
+                />
+                <label
+                  :for="'pay_group_' + course.id"
+                  class="label-text ml-2 font-bold"
+                >
+                  {{ course.title }} - {{ course.price }} DH
+                </label>
+              </div>
+            </template>
+          </div>
+          <button
+            @click="confirmPay"
+            type="button"
+            class="
+              text-white
+              bg-red-600
+              hover:bg-red-800
+              focus:ring-4 focus:outline-none focus:ring-red-300
+              dark:focus:ring-red-800
+              font-medium
+              rounded-lg
+              text-sm
+              inline-flex
+              items-center
+              px-5
+              py-2.5
+              text-center
+              mr-2
+            "
+          >
+            Pay
+          </button>
+          <button
+            @click="cancelPay"
+            type="button"
+            class="
+              text-gray-500
+              bg-white
+              hover:bg-gray-100
+              focus:ring-4 focus:outline-none focus:ring-gray-200
+              rounded-lg
+              border border-gray-200
+              text-sm
+              font-medium
+              px-5
+              py-2.5
+              hover:text-gray-900
+              focus:z-10
+              dark:bg-gray-700
+              dark:text-gray-300
+              dark:border-gray-500
+              dark:hover:text-white
+              dark:hover:bg-gray-600
+              dark:focus:ring-gray-600
+            "
+          >
+            No, cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
@@ -68,6 +244,7 @@ const confirmDeletion = () => {
           <th scope="col">Age</th>
           <th scope="col">Grade</th>
           <th scope="col">Groups</th>
+          <th scope="col">Payment State</th>
           <th scope="col">State</th>
           <th scope="col">Actions</th>
         </tr>
@@ -139,6 +316,76 @@ const confirmDeletion = () => {
               </div>
             </td>
             <td>
+              <button
+                :id="'dropdownDefault-' + student.id"
+                :data-dropdown-toggle="'dropdown-' + student.id"
+                class="
+                  underline
+                  decoration-dotted
+                  cursor-pointer
+                  font-semibold
+                  text-gray-600
+                  hover:text-gray-400
+                "
+                type="button"
+              >
+                Payments state
+              </button>
+
+              <div
+                :id="'dropdown-' + student.id"
+                class="
+                  z-50
+                  hidden
+                  bg-white
+                  divide-y divide-gray-100
+                  rounded
+                  shadow
+                  dark:bg-gray-700
+                "
+              >
+                <ul
+                  class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                  :aria-labelledby="'dropdownDefault-' + student.id"
+                >
+                  <template v-for="group in student.groups" :key="group.id">
+                    <li
+                      class="flex justify-between items-center gap-4 px-4 py-2"
+                    >
+                      <span class="font-bold">{{ group.title }}</span>
+
+                      <Link
+                        :href="
+                          route('students.index', {
+                            filter:
+                              group.course.payments.length > 0 &&
+                              group.course.payments[0].student_id === student.id
+                                ? group.course.payments[0].state
+                                : 'pending',
+                          })
+                        "
+                      >
+                        <TagPill
+                          :value="
+                            group.course.payments.length > 0 &&
+                            group.course.payments[0].student_id === student.id
+                              ? group.course.payments[0].amount_payed ==
+                                group.course.price
+                                ? group.course.payments[0].state
+                                : `pending (-${
+                                    group.course.price -
+                                    group.course.payments[0].amount_payed
+                                  } DH)`
+                              : 'pending'
+                          "
+                        />
+                      </Link>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </td>
+            <td>
               <div class="flex items-center">
                 <Link
                   :href="
@@ -193,6 +440,16 @@ const confirmDeletion = () => {
                         w-52
                       "
                     >
+                      <li>
+                        <p @click="pay(student)">
+                          <span class="flex items-center">
+                            <span class="material-icons text-gray-400 text-xs"
+                              >money</span
+                            >
+                            <span class="ml-2">New payment</span>
+                          </span>
+                        </p>
+                      </li>
                       <li>
                         <Link
                           :href="

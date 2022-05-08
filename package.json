@@ -30,6 +30,7 @@
     },
     "dependencies": {
         "daisyui": "^2.14.2",
+        "flowbite": "^1.4.5",
         "material-icons": "^1.10.8"
     }
 }
