@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Course;
-use App\Models\Group;
-use App\Models\GroupStudent;
-use App\Models\Student;
-use App\Models\Teacher;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,39 +16,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // todo: Create a teacher
 
-        $teacher = Teacher::create([
-            'name' => 'Mehdi Jai',
-            'email' => 'mehdi.jai.mj@gmail.com',
-            'phone' => '0612113830',
+        User::create([
+            'name' => "Mehdi Jai",
+            'email' => "mehdi.jai.mj@gmail.com",
+            'email_verified_at' => now(),
+            'password' => Hash::make("123456789"),
+            'remember_token' => Str::random(10),
         ]);
 
-        // todo: Create a course
+        // $teacher = Teacher::create([
+        //     'name' => 'Mehdi Jai',
+        //     'email' => 'mehdi.jai.mj@gmail.com',
+        //     'phone' => '0612113830',
+        // ]);
 
-        $course = Course::create([
-            'title' => 'Web development',
-            'teacher_id' => $teacher->id,
-        ]);
+        // $course = Course::create([
+        //     'title' => 'Web development',
+        //     'teacher_id' => $teacher->id,
+        // ]);
 
-        // todo: Create a group
+        // $group = Group::create([
+        //     'title' => 'GPA',
+        //     'course_id' => $course->id,
+        // ]);
 
-        $group = Group::create([
-            'title' => 'GPA',
-            'course_id' => $course->id,
-        ]);
-
-        // todo: Create a student
-
-        $student = Student::create([
-            'name' => 'Mehdi Jai',
-            'email' => 'mehdi.jai.mj@gmail.com',
-            'phone' => '0612113830',
-            'age' => 23,
-            'grade' => 'bac+3',
-        ]);
-
-        // todo: Assign student to group
+        // $student = Student::create([
+        //     'name' => 'Mehdi Jai',
+        //     'email' => 'mehdi.jai.mj@gmail.com',
+        //     'phone' => '0612113830',
+        //     'age' => 23,
+        //     'grade' => 'bac+3',
+        // ]);
 
         // GroupStudent::create([
         //     'student_id' => $student->id,
