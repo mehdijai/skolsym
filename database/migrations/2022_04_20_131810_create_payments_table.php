@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
+            $table->uuid('ref')->unique();
             $table->foreignId('student_id')->references('id')->on('students');
             $table->foreignId('course_id')->references('id')->on('courses');
             $table->float('amount_payed');

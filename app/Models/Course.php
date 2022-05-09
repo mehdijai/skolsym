@@ -16,6 +16,7 @@ class Course extends Model
         'teacher_id',
         'title',
         'price',
+        'teacher_percentage',
         'period',
         'payment_type',
         'state',

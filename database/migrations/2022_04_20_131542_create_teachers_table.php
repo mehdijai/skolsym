@@ -16,9 +16,8 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->unique('teachers');
             $table->string('phone');
-            $table->float('percentage')->default(50.00);
             $table->string('state')->default('active');
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();

@@ -103,6 +103,7 @@ const confirmDeletion = () => {
           <th v-if="profile === false" scope="col">Teacher</th>
           <th scope="col">Period</th>
           <th scope="col">Price</th>
+          <th scope="col">Teacher <span class="font-bold text-red-400">%</span></th>
           <th scope="col">Payment type</th>
           <th scope="col">Groups</th>
           <th scope="col">State</th>
@@ -164,6 +165,11 @@ const confirmDeletion = () => {
             <td>
               <div class="flex items-center">
                 <p class="whitespace-no-wrap">{{ course.price }} DH</p>
+              </div>
+            </td>
+            <td>
+              <div class="flex items-center">
+                <p class="whitespace-no-wrap">{{ course.teacher_percentage * 100 }} %</p>
               </div>
             </td>
             <td>

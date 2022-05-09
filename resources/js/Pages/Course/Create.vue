@@ -32,6 +32,7 @@ const form = useForm({
   title: edit.value ? props.course.title : "",
   period: edit.value ? String(props.course.period) : "",
   price: edit.value ? String(props.course.price) : "",
+  teacher_percentage: edit.value ? String(props.course.teacher_percentage) : "",
   payment_type: edit.value ? props.course.payment_type : "monthly",
   teacher_id: edit.value ? String(props.course.teacher_id) : props.withTeacher,
   state: edit.value
@@ -156,6 +157,7 @@ const submit = () => {
                 id="price"
                 v-model="form.price"
                 type="number"
+                step="0.01"
                 class="mt-1 block w-full"
                 required
                 autocomplete="price"
@@ -163,6 +165,26 @@ const submit = () => {
               <JetInputError
                 v-if="form.errors.price"
                 :message="form.errors.price"
+              />
+            </div>
+
+            <div>
+              <JetLabel for="percentage" value="Teacher percentage" />
+              <JetInput
+                id="percentage"
+                v-model="form.teacher_percentage"
+                type="number"
+                step="0.01"
+                class="mt-1 block w-full"
+                required
+                autocomplete="percentage"
+                placeholder="0.5"
+                max="1"
+                min="0"
+              />
+              <JetInputError
+                v-if="form.errors.teacher_percentage"
+                :message="form.errors.teacher_percentage"
               />
             </div>
 

@@ -72,6 +72,7 @@ class CourseController extends Controller
             'price' => 'required|numeric',
             'payment_type' => ['required', Rule::in(StateLists::PAYMENT_TYPE)],
             'teacher_id' => 'required|numeric|exists:teachers,id',
+            'teacher_percentage' => 'required|numeric',
         ]);
 
         Course::create($validator->validated());
@@ -101,6 +102,7 @@ class CourseController extends Controller
             'teacher_id' => 'sometimes|required|numeric|exists:teachers,id',
             'state' => ['sometimes', 'nullable', Rule::in(StateLists::COURSE)],
             'archived' => 'sometimes|boolean',
+            'teacher_percentage' => 'required|numeric',
         ]);
 
         $validated = $validator->validated();
@@ -110,6 +112,7 @@ class CourseController extends Controller
         $course->title = $validated["title"];
         $course->period = $validated["period"];
         $course->price = $validated["price"];
+        $course->teacher_percentage = $validated["teacher_percentage"];
         $course->payment_type = $validated["payment_type"];
         $course->teacher_id = $validated["teacher_id"];
 

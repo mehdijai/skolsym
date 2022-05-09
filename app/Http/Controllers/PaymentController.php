@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Const\RefGenerator;
 use App\Const\StateLists;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -9,6 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
+    public function index()
+    {
+
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -20,6 +26,7 @@ class PaymentController extends Controller
 
         foreach ($validated['courses'] as $course) {
             Payment::create([
+                'ref' => RefGenerator::generate(),
                 'student_id' => $validated['student_id'],
                 'course_id' => $course['id'],
                 'amount_payed' => $course['price'],
