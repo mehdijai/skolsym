@@ -12,6 +12,10 @@ import Checkbox from "@/Jetstream/Checkbox.vue";
 const props = defineProps({
   students: Array,
   style: Object,
+  group: {
+    type: Object,
+    default: null,
+  },
 });
 
 const removeStudent = ref(null);
@@ -64,9 +68,19 @@ function getCourses(student) {
 }
 
 const pay = (student) => {
-  paying.value = student;
-  payForm.student_id = student.id;
-  attachedCourses.value = getCourses(student);
+  if (props.group != null) {
+    payForm.student_id = student.id;
+    payForm.courses = [props.group.course];
+    payForm.post(route("payments.store"), {
+      onSuccess: () => {
+        payForm.reset();
+      },
+    });
+  } else {
+    paying.value = student;
+    payForm.student_id = student.id;
+    attachedCourses.value = getCourses(student);
+  }
 };
 
 const cancelPay = () => {
@@ -243,7 +257,7 @@ onMounted(() => {
           <th scope="col">Phone</th>
           <th scope="col">Age</th>
           <th scope="col">Grade</th>
-          <th scope="col">Groups</th>
+          <th scope="col">{{ group != null ? "Other groups" : "Groups" }}</th>
           <th scope="col">Payment State</th>
           <th scope="col">State</th>
           <th scope="col">Actions</th>
@@ -262,9 +276,23 @@ onMounted(() => {
           >
             <td>
               <div class="flex items-center">
-                <p class="font-bold text-gray-900 whitespace-no-wrap">
+                <p
+                  v-if="group == null"
+                  class="font-bold text-gray-900 whitespace-no-wrap"
+                >
                   {{ student.name }}
                 </p>
+                <Link
+                  v-else
+                  :href="
+                    route('students.index', {
+                      search: 'student:' + student.id,
+                    })
+                  "
+                  class="font-bold text-gray-900 whitespace-no-wrap"
+                >
+                  {{ student.name }}
+                </Link>
               </div>
             </td>
             <td>
@@ -301,7 +329,26 @@ onMounted(() => {
                 </p>
               </div>
             </td>
-            <td>
+            <td v-if="group != null">
+              <div class="flex items-center">
+                <Link
+                  :href="
+                    route('groups.index', { search: 'students:' + student.id })
+                  "
+                  class="font-semibold whitespace-no-wrap"
+                >
+                  {{ student.groups.filter((g) => g.id != group.id).length }}
+                  group{{
+                    Number(
+                      student.groups.filter((g) => g.id != group.id).length
+                    ) > 1
+                      ? "s"
+                      : ""
+                  }}
+                </Link>
+              </div>
+            </td>
+            <td v-else>
               <div class="flex items-center">
                 <Link
                   :href="
@@ -315,7 +362,34 @@ onMounted(() => {
                 </Link>
               </div>
             </td>
-            <td>
+            <td v-if="group != null">
+              <span class="flex items-center">
+                <Link
+                  :href="
+                    route('groups.view', [
+                      group.id,
+                      {
+                        search:
+                          group.course.payments.length > 0 &&
+                          group.course.payments[0].student_id === student.id
+                            ? group.course.payments[0].state
+                            : 'pending',
+                      },
+                    ])
+                  "
+                >
+                  <TagPill
+                    :value="
+                      group.course.payments.length > 0 &&
+                      group.course.payments[0].student_id === student.id
+                        ? group.course.payments[0].state
+                        : 'pending'
+                    "
+                  />
+                </Link>
+              </span>
+            </td>
+            <td v-else>
               <button
                 :id="'dropdownDefault-' + student.id"
                 :data-dropdown-toggle="'dropdown-' + student.id"
@@ -352,7 +426,11 @@ onMounted(() => {
                     <li
                       class="flex justify-between items-center gap-4 px-4 py-2"
                     >
-                      <span class="font-bold">{{ group.title }}</span>
+                      <Link
+                        :href="route('groups.view', [group.id])"
+                        class="link font-bold"
+                        >{{ group.title }}</Link
+                      >
 
                       <Link
                         :href="
@@ -414,7 +492,7 @@ onMounted(() => {
             <td>
               <div class="flex items-center">
                 <div class="ml-3 relative">
-                  <div class="dropdown dropdown-end">
+                  <div class="dropdown dropdown-left dropdown-end">
                     <label
                       tabindex="0"
                       class="
@@ -440,7 +518,18 @@ onMounted(() => {
                         w-52
                       "
                     >
-                      <li>
+                      <li
+                        v-if="
+                          group == null
+                            ? student.payments.length == 0 ||
+                              student.payments.find((p) => p.state != 'paid') !=
+                                undefined
+                            : group.course.payments.length == 0 ||
+                              group.course.payments.find(
+                                (p) => p.state != 'paid'
+                              )
+                        "
+                      >
                         <p @click="pay(student)">
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"

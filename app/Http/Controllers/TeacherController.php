@@ -53,7 +53,7 @@ class TeacherController extends Controller
                 $query->selectSub('100', 'revenue');
             },
         ])
-        ->find($id);
+            ->find($id);
 
         if (empty($teacher)) {
             abort(404, "This teacher doesn't exist in our records");
@@ -63,7 +63,12 @@ class TeacherController extends Controller
             'teacher' => $teacher,
             'teachers' => Teacher::select(['id', 'name'])->withCount('courses')->where('id', '!=', $id)->get(),
             'groups' => Group::query()->with('course')->whereRelation('course.teacher', 'id', $id)->withCount('students')->get(),
-            'students' => Student::query()->with('groups')->whereRelation('groups.course.teacher', 'id', $id)->get(),
+            'students' => Student::query()
+                ->with('groups.course.payments', function ($q) {
+                    $q->latest();
+                })
+                ->whereRelation('groups.course.teacher', 'id', $id)
+                ->get(),
         ]);
     }
 

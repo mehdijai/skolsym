@@ -119,9 +119,12 @@ const confirmDeletion = () => {
           >
             <td>
               <div class="flex items-center">
-                <p class="font-bold text-gray-900 whitespace-no-wrap">
+                <Link
+                  :href="route('groups.view', [group.id])"
+                  class="font-bold text-gray-900 whitespace-no-wrap"
+                >
                   {{ group.title }}
-                </p>
+                </Link>
               </div>
             </td>
             <td>
@@ -220,7 +223,9 @@ const confirmDeletion = () => {
                       "
                     >
                       <li v-if="!group.archived">
-                        <Link :href="route('students.create', {group: group.id})">
+                        <Link
+                          :href="route('students.create', { group: group.id })"
+                        >
                           <span class="flex items-center">
                             <span class="material-icons text-gray-400 text-xs"
                               >add_circle</span

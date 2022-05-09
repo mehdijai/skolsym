@@ -73,6 +73,7 @@ Route::middleware([
         Route::post('/edit', [GroupController::class, 'edit'])->name('edit');
         Route::get('/archive/{id}', [GroupController::class, 'archive'])->name('archive');
         Route::post('/delete', [GroupController::class, 'delete'])->name("delete");
+        Route::get('/{id}', [GroupController::class, 'view'])->name("view");
     });
 
     // Student Routes

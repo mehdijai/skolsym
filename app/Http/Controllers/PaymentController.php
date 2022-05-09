@@ -28,6 +28,6 @@ class PaymentController extends Controller
             ]);
         }
 
-        return redirect()->route('students.index');
+        return redirect()->back();
     }
 }
