@@ -89,6 +89,11 @@ Route::middleware([
     Route::name('payments.')->prefix('payments')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
+        Route::get('/create', [PaymentController::class, 'create'])->name('create');
+        Route::get('/update/{id}', [PaymentController::class, 'update'])->name('update');
+        Route::post('/edit', [PaymentController::class, 'edit'])->name('edit');
+        Route::post('/delete', [PaymentController::class, 'delete'])->name("delete");
+        Route::post('/pay', [PaymentController::class, 'pay'])->name("pay");
     });
 
     // Accounting Routes

@@ -103,226 +103,271 @@ const confirmDeletion = () => {
           <th v-if="profile === false" scope="col">Teacher</th>
           <th scope="col">Period</th>
           <th scope="col">Price</th>
-          <th scope="col">Teacher <span class="font-bold text-red-400">%</span></th>
+          <th scope="col">
+            Teacher <span class="font-bold text-red-400">%</span>
+          </th>
           <th scope="col">Payment type</th>
           <th scope="col">Groups</th>
           <th scope="col">State</th>
-          <th v-if="courses.length > 0 ? courses[0].revenue : false" scope="col">Revenue</th>
+          <th
+            v-if="courses.length > 0 ? courses[0].revenue : false"
+            scope="col"
+          >
+            Revenue
+          </th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <template v-for="course in courses" :key="course.id">
-          <tr
-            :class="
-              course.state === 'removed'
-                ? 'bg-red-50'
-                : course.archived
-                ? 'bg-orange-50'
-                : 'bg-white'
-            "
-          >
-            <td>
-              <div class="flex items-center">
-                <p
-                  class="
-                    font-bold
-                    text-gray-900
-                    whitespace-no-wrap
-                  "
-                >
-                  {{ course.title }}
-                </p>
-              </div>
-            </td>
-            <td v-if="profile === false">
-              <div class="flex items-center">
-                <Link
-                  :href="route('teachers.view', [course.teacher.id])"
-                  class="
-                    text-cyan-600
-                    hover:text-cyan-800
-                    whitespace-no-wrap
-                    flex
-                    items-center
-                    font-semibold
-                  "
-                >
-                  {{ course.teacher.name }}
-                  <span class="material-icons text-xs ml-1">open_in_new</span>
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">
-                  {{ course.period }} week{{
-                    Number(course.period) > 1 ? "s" : ""
-                  }}
-                </p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">{{ course.price }} DH</p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">{{ course.teacher_percentage * 100 }} %</p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="capitalize whitespace-no-wrap">
-                  {{ course.payment_type }}
-                </p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.index', { search: 'course:' + course.id })
-                  "
-                  class="font-semibold whitespace-no-wrap"
-                >
-                  {{ course.groups_count }} group{{
-                    Number(course.groups_count) > 1 ? "s" : ""
-                  }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('courses.index', {
-                      filter:
+        <template v-if="courses.length > 0">
+          <template v-for="course in courses" :key="course.id">
+            <tr
+              :class="
+                course.state === 'removed'
+                  ? 'bg-red-50'
+                  : course.archived
+                  ? 'bg-orange-50'
+                  : 'bg-white'
+              "
+            >
+              <td>
+                <div class="flex items-center">
+                  <p class="font-bold text-gray-900 whitespace-no-wrap">
+                    {{ course.title }}
+                  </p>
+                </div>
+              </td>
+              <td v-if="profile === false">
+                <div class="flex items-center">
+                  <Link
+                    :href="route('teachers.view', [course.teacher.id])"
+                    class="
+                      text-cyan-600
+                      hover:text-cyan-800
+                      whitespace-no-wrap
+                      flex
+                      items-center
+                      font-semibold
+                    "
+                  >
+                    {{ course.teacher.name }}
+                    <span class="material-icons text-xs ml-1">open_in_new</span>
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="whitespace-no-wrap">
+                    {{ course.period }} week{{
+                      Number(course.period) > 1 ? "s" : ""
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="whitespace-no-wrap">{{ course.price }} DH</p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="whitespace-no-wrap">
+                    {{ course.teacher_percentage * 100 }} %
+                  </p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="capitalize whitespace-no-wrap">
+                    {{ course.payment_type }}
+                  </p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.index', { search: 'course:' + course.id })
+                    "
+                    class="font-semibold whitespace-no-wrap"
+                  >
+                    {{ course.groups_count }} group{{
+                      Number(course.groups_count) > 1 ? "s" : ""
+                    }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('courses.index', {
+                        filter:
+                          course.state === 'removed'
+                            ? course.state
+                            : course.archived
+                            ? 'archived'
+                            : course.state,
+                      })
+                    "
+                  >
+                    <TagPill
+                      :value="
                         course.state === 'removed'
                           ? course.state
                           : course.archived
                           ? 'archived'
-                          : course.state,
-                    })
-                  "
-                >
-                  <TagPill
-                    :value="
-                      course.state === 'removed'
-                        ? course.state
-                        : course.archived
-                        ? 'archived'
-                        : course.state
-                    "
-                  />
-                </Link>
-              </div>
-            </td>
-            <td v-if="courses[0].revenue">
-              <span class="font-semibold text-orange-700">
-                {{ course.revenue }} DH
-              </span>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <div class="ml-3 relative">
-                  <div class="dropdown dropdown-end">
-                    <label
-                      tabindex="0"
-                      class="
-                        material-icons
-                        bg-gray-200
-                        rounded-full
-                        px-2
-                        cursor-pointer
-                        hover:bg-gray-300
+                          : course.state
                       "
-                    >
-                      more_horiz
-                    </label>
-                    <ul
-                      tabindex="0"
-                      class="
-                        dropdown-content
-                        menu
-                        z-40
-                        shadow
-                        bg-base-100
-                        rounded-md
-                        w-52
-                      "
-                    >
-                      <li>
-                        <Link
-                          :href="route('courses.update', { id: course.id })"
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >edit</span
-                            >
-                            <span class="ml-2">Update</span>
-                          </span>
-                        </Link>
-                      </li>
+                    />
+                  </Link>
+                </div>
+              </td>
+              <td v-if="courses[0].revenue">
+                <span class="font-semibold text-orange-700">
+                  {{ course.revenue }} DH
+                </span>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <div class="ml-3 relative">
+                    <div class="dropdown dropdown-end">
+                      <label
+                        tabindex="0"
+                        class="
+                          material-icons
+                          bg-gray-200
+                          rounded-full
+                          px-2
+                          cursor-pointer
+                          hover:bg-gray-300
+                        "
+                      >
+                        more_horiz
+                      </label>
+                      <ul
+                        tabindex="0"
+                        class="
+                          dropdown-content
+                          menu
+                          z-40
+                          shadow
+                          bg-base-100
+                          rounded-md
+                          w-52
+                        "
+                      >
+                        <li>
+                          <Link
+                            :href="route('courses.update', { id: course.id })"
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >edit</span
+                              >
+                              <span class="ml-2">Update</span>
+                            </span>
+                          </Link>
+                        </li>
 
-                      <li>
-                        <p @click="deleteCourse(course)">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >delete</span
-                            >
-                            <span class="ml-2">Delete</span>
-                          </span>
-                        </p>
-                      </li>
+                        <li>
+                          <p @click="deleteCourse(course)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >delete</span
+                              >
+                              <span class="ml-2">Delete</span>
+                            </span>
+                          </p>
+                        </li>
 
-                      <li>
-                        <Link :href="route('courses.archive', course.id)">
-                          <span class="flex items-center">
-                            <span
-                              class="material-icons text-gray-400 text-xs"
-                              >{{
-                                course.archived ? "unarchive" : "inventory_2"
-                              }}</span
-                            >
-                            <span class="ml-2">{{
-                              course.archived ? "Unarchive" : "Archive"
-                            }}</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          :href="
-                            route('groups.index', {
-                              search: 'course:' + course.id,
-                            })
-                          "
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >list</span
-                            >
-                            <span class="ml-2">Groups</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          :href="route('groups.create', { course: course.id })"
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >add_circle</span
-                            >
-                            <span class="ml-2">Add group</span>
-                          </span>
-                        </Link>
-                      </li>
-                    </ul>
+                        <li>
+                          <Link :href="route('courses.archive', course.id)">
+                            <span class="flex items-center">
+                              <span
+                                class="material-icons text-gray-400 text-xs"
+                                >{{
+                                  course.archived ? "unarchive" : "inventory_2"
+                                }}</span
+                              >
+                              <span class="ml-2">{{
+                                course.archived ? "Unarchive" : "Archive"
+                              }}</span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            :href="
+                              route('groups.index', {
+                                search: 'course:' + course.id,
+                              })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >list</span
+                              >
+                              <span class="ml-2">Groups</span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            :href="
+                              route('groups.create', { course: course.id })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >add_circle</span
+                              >
+                              <span class="ml-2">Add group</span>
+                            </span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
+              </td>
+            </tr>
+          </template>
+        </template>
+        <template v-else>
+          <tr>
+            <td colspan="100">
+              <div
+                class="
+                  p-8
+                  text-center
+                  border border-gray-200
+                  rounded-lg
+                  bg-white
+                  shadow
+                "
+              >
+                <h2 class="text-2xl font-bold">The list still empty!</h2>
+
+                <p class="mt-4 text-sm text-gray-500">Add a new course.</p>
+
+                <Link
+                  :href="route('courses.create')"
+                  class="
+                    inline-flex
+                    items-center
+                    px-5
+                    py-3
+                    mt-8
+                    font-medium
+                    text-white
+                    bg-cyan-700
+                    rounded-lg
+                    hover:bg-cyan-600
+                  "
+                >
+                  Create a course
+                </Link>
               </div>
             </td>
           </tr>

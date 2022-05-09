@@ -28,7 +28,7 @@ const props = defineProps({
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <CourseTable v-if="courses.length > 0" :courses="courses">
+        <CourseTable :courses="courses">
           <template #header>
             <div
               class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full"
@@ -49,33 +49,6 @@ const props = defineProps({
             </div>
           </template>
         </CourseTable>
-        <div v-else class="w-full min-h-2xl">
-          <div
-            class="relative p-8 text-center border border-gray-200 rounded-lg bg-white shadow"
-          >
-            <h2 class="text-2xl font-bold">The list still empty!</h2>
-
-            <p class="mt-4 text-sm text-gray-500">Add a new course.</p>
-
-            <Link
-              :href="route('courses.create')"
-              class="
-                inline-flex
-                items-center
-                px-5
-                py-3
-                mt-8
-                font-medium
-                text-white
-                bg-cyan-700
-                rounded-lg
-                hover:bg-cyan-600
-              "
-            >
-              Create a course
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   </AppLayout>

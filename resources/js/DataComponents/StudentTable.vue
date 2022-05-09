@@ -264,352 +264,405 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <template v-for="student in students" :key="student.id">
-          <tr
-            :class="
-              student.state === 'removed'
-                ? 'bg-red-50'
-                : student.archived
-                ? 'bg-orange-50'
-                : 'bg-white'
-            "
-          >
-            <td>
-              <div class="flex items-center">
-                <p
-                  v-if="group == null"
-                  class="font-bold text-gray-900 whitespace-no-wrap"
-                >
-                  {{ student.name }}
-                </p>
-                <Link
-                  v-else
-                  :href="
-                    route('students.index', {
-                      search: 'student:' + student.id,
-                    })
-                  "
-                  class="font-bold text-gray-900 whitespace-no-wrap"
-                >
-                  {{ student.name }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <a
-                  :href="'mailto:' + student.email"
-                  class="text-cyan-600 hover:text-cyan-800 whitespace-no-wrap"
-                >
-                  {{ student.email }}
-                </a>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <a
-                  :href="'tel:' + student.phone"
-                  class="text-cyan-600 hover:text-cyan-800 whitespace-no-wrap"
-                >
-                  {{ student.phone }}
-                </a>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">
-                  {{ student.age }}
-                </p>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <p class="whitespace-no-wrap">
-                  {{ student.grade }}
-                </p>
-              </div>
-            </td>
-            <td v-if="group != null">
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.index', { search: 'students:' + student.id })
-                  "
-                  class="font-semibold whitespace-no-wrap"
-                >
-                  {{ student.groups.filter((g) => g.id != group.id).length }}
-                  group{{
-                    Number(
-                      student.groups.filter((g) => g.id != group.id).length
-                    ) > 1
-                      ? "s"
-                      : ""
-                  }}
-                </Link>
-              </div>
-            </td>
-            <td v-else>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.index', { search: 'students:' + student.id })
-                  "
-                  class="font-semibold whitespace-no-wrap"
-                >
-                  {{ student.groups.length }} group{{
-                    Number(student.groups.length) > 1 ? "s" : ""
-                  }}
-                </Link>
-              </div>
-            </td>
-            <td v-if="group != null">
-              <span class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.view', [
-                      group.id,
-                      {
-                        search:
-                          group.course.payments.length > 0 &&
-                          group.course.payments[0].student_id === student.id
-                            ? group.course.payments[0].state
-                            : 'pending',
-                      },
-                    ])
-                  "
-                >
-                  <TagPill
-                    :value="
-                      group.course.payments.length > 0 &&
-                      group.course.payments[0].student_id === student.id
-                        ? group.course.payments[0].state
-                        : 'pending'
+        <template v-if="students.length > 0">
+          <template v-for="student in students" :key="student.id">
+            <tr
+              :class="
+                student.state === 'removed'
+                  ? 'bg-red-50'
+                  : student.archived
+                  ? 'bg-orange-50'
+                  : 'bg-white'
+              "
+            >
+              <td>
+                <div class="flex items-center">
+                  <p
+                    v-if="group == null"
+                    class="font-bold text-gray-900 whitespace-no-wrap"
+                  >
+                    {{ student.name }}
+                  </p>
+                  <Link
+                    v-else
+                    :href="
+                      route('students.index', {
+                        search: 'student:' + student.id,
+                      })
                     "
-                  />
-                </Link>
-              </span>
-            </td>
-            <td v-else>
-              <button
-                :id="'dropdownDefault-' + student.id"
-                :data-dropdown-toggle="'dropdown-' + student.id"
-                class="
-                  underline
-                  decoration-dotted
-                  cursor-pointer
-                  font-semibold
-                  text-gray-600
-                  hover:text-gray-400
-                "
-                type="button"
-              >
-                Payments state
-              </button>
-
-              <div
-                :id="'dropdown-' + student.id"
-                class="
-                  z-50
-                  hidden
-                  bg-white
-                  divide-y divide-gray-100
-                  rounded
-                  shadow
-                  dark:bg-gray-700
-                "
-              >
-                <ul
-                  class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                  :aria-labelledby="'dropdownDefault-' + student.id"
-                >
-                  <template v-for="group in student.groups" :key="group.id">
-                    <li
-                      class="flex justify-between items-center gap-4 px-4 py-2"
-                    >
-                      <Link
-                        :href="route('groups.view', [group.id])"
-                        class="link font-bold"
-                        >{{ group.title }}</Link
-                      >
-
-                      <Link
-                        :href="
-                          route('students.index', {
-                            filter:
-                              group.course.payments.length > 0 &&
-                              group.course.payments[0].student_id === student.id
-                                ? group.course.payments[0].state
-                                : 'pending',
-                          })
-                        "
-                      >
-                        <TagPill
-                          :value="
+                    class="font-bold text-gray-900 whitespace-no-wrap"
+                  >
+                    {{ student.name }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <a
+                    :href="'mailto:' + student.email"
+                    class="text-cyan-600 hover:text-cyan-800 whitespace-no-wrap"
+                  >
+                    {{ student.email }}
+                  </a>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <a
+                    :href="'tel:' + student.phone"
+                    class="text-cyan-600 hover:text-cyan-800 whitespace-no-wrap"
+                  >
+                    {{ student.phone }}
+                  </a>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="whitespace-no-wrap">
+                    {{ student.age }}
+                  </p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="whitespace-no-wrap">
+                    {{ student.grade }}
+                  </p>
+                </div>
+              </td>
+              <td v-if="group != null">
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.index', {
+                        search: 'students:' + student.id,
+                      })
+                    "
+                    class="font-semibold whitespace-no-wrap"
+                  >
+                    {{ student.groups.filter((g) => g.id != group.id).length }}
+                    group{{
+                      Number(
+                        student.groups.filter((g) => g.id != group.id).length
+                      ) > 1
+                        ? "s"
+                        : ""
+                    }}
+                  </Link>
+                </div>
+              </td>
+              <td v-else>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.index', {
+                        search: 'students:' + student.id,
+                      })
+                    "
+                    class="font-semibold whitespace-no-wrap"
+                  >
+                    {{ student.groups.length }} group{{
+                      Number(student.groups.length) > 1 ? "s" : ""
+                    }}
+                  </Link>
+                </div>
+              </td>
+              <td v-if="group != null">
+                <span class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.view', [
+                        group.id,
+                        {
+                          search:
                             group.course.payments.length > 0 &&
                             group.course.payments[0].student_id === student.id
-                              ? group.course.payments[0].amount_payed ==
-                                group.course.price
-                                ? group.course.payments[0].state
-                                : `pending (-${
-                                    group.course.price -
-                                    group.course.payments[0].amount_payed
-                                  } DH)`
-                              : 'pending'
+                              ? group.course.payments[0].state
+                              : 'pending',
+                        },
+                      ])
+                    "
+                  >
+                    <TagPill
+                      :value="
+                        group.course.payments.length > 0 &&
+                        group.course.payments[0].student_id === student.id
+                          ? group.course.payments[0].state
+                          : 'pending'
+                      "
+                    />
+                  </Link>
+                </span>
+              </td>
+              <td v-else>
+                <button
+                  :id="'dropdownDefault-' + student.id"
+                  :data-dropdown-toggle="'dropdown-' + student.id"
+                  class="
+                    underline
+                    decoration-dotted
+                    cursor-pointer
+                    font-semibold
+                    text-gray-600
+                    hover:text-gray-400
+                  "
+                  type="button"
+                >
+                  Payments state
+                </button>
+
+                <div
+                  :id="'dropdown-' + student.id"
+                  class="
+                    z-50
+                    hidden
+                    bg-white
+                    divide-y divide-gray-100
+                    rounded
+                    shadow
+                    dark:bg-gray-700
+                  "
+                >
+                  <ul
+                    class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                    :aria-labelledby="'dropdownDefault-' + student.id"
+                  >
+                    <template v-for="group in student.groups" :key="group.id">
+                      <li
+                        class="
+                          flex
+                          justify-between
+                          items-center
+                          gap-4
+                          px-4
+                          py-2
+                        "
+                      >
+                        <Link
+                          :href="route('groups.view', [group.id])"
+                          class="link font-bold"
+                          >{{ group.title }}</Link
+                        >
+
+                        <Link
+                          :href="
+                            route('students.index', {
+                              filter:
+                                group.course.payments.length > 0 &&
+                                group.course.payments[0].student_id ===
+                                  student.id
+                                  ? group.course.payments[0].state
+                                  : 'pending',
+                            })
                           "
-                        />
-                      </Link>
-                    </li>
-                  </template>
-                </ul>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('students.index', {
-                      filter:
+                        >
+                          <TagPill
+                            :value="
+                              group.course.payments.length > 0 &&
+                              group.course.payments[0].student_id === student.id
+                                ? group.course.payments[0].amount_payed ==
+                                  group.course.price
+                                  ? group.course.payments[0].state
+                                  : `pending (-${
+                                      group.course.price -
+                                      group.course.payments[0].amount_payed
+                                    } DH)`
+                                : 'pending'
+                            "
+                          />
+                        </Link>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('students.index', {
+                        filter:
+                          student.state === 'removed'
+                            ? student.state
+                            : student.archived
+                            ? 'archived'
+                            : student.state,
+                      })
+                    "
+                  >
+                    <TagPill
+                      :value="
                         student.state === 'removed'
                           ? student.state
                           : student.archived
                           ? 'archived'
-                          : student.state,
-                    })
-                  "
-                >
-                  <TagPill
-                    :value="
-                      student.state === 'removed'
-                        ? student.state
-                        : student.archived
-                        ? 'archived'
-                        : student.state
-                    "
-                  />
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <div class="ml-3 relative">
-                  <div class="dropdown dropdown-left dropdown-end">
-                    <label
-                      tabindex="0"
-                      class="
-                        material-icons
-                        bg-gray-200
-                        rounded-full
-                        px-2
-                        cursor-pointer
-                        hover:bg-gray-300
+                          : student.state
                       "
-                    >
-                      more_horiz
-                    </label>
-                    <ul
-                      tabindex="0"
-                      class="
-                        dropdown-content
-                        menu
-                        z-40
-                        shadow
-                        bg-base-100
-                        rounded-md
-                        w-52
-                      "
-                    >
-                      <li
-                        v-if="
-                          group == null
-                            ? student.payments.length == 0 ||
-                              student.payments.find((p) => p.state != 'paid') !=
-                                undefined
-                            : group.course.payments.length == 0 ||
-                              group.course.payments.find(
-                                (p) => p.state != 'paid'
-                              )
+                    />
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <div class="ml-3 relative">
+                    <div class="dropdown dropdown-left dropdown-end">
+                      <label
+                        tabindex="0"
+                        class="
+                          material-icons
+                          bg-gray-200
+                          rounded-full
+                          px-2
+                          cursor-pointer
+                          hover:bg-gray-300
                         "
                       >
-                        <p @click="pay(student)">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >money</span
-                            >
-                            <span class="ml-2">New payment</span>
-                          </span>
-                        </p>
-                      </li>
-                      <li>
-                        <Link
-                          :href="
-                            route('groups.create', { student: student.id })
+                        more_horiz
+                      </label>
+                      <ul
+                        tabindex="0"
+                        class="
+                          dropdown-content
+                          menu
+                          z-40
+                          shadow
+                          bg-base-100
+                          rounded-md
+                          w-52
+                        "
+                      >
+                        <li
+                          v-if="
+                            group == null
+                              ? student.payments.length == 0 ||
+                                student.payments.find(
+                                  (p) => p.state != 'paid'
+                                ) != undefined
+                              : group.course.payments.length == 0 ||
+                                group.course.payments.find(
+                                  (p) => p.state != 'paid'
+                                )
                           "
                         >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >add_circle</span
-                            >
-                            <span class="ml-2">Add group</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          :href="
-                            route('groups.index', {
-                              search: 'students:' + student.id,
-                            })
-                          "
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >list</span
-                            >
-                            <span class="ml-2">Groups</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          :href="route('students.update', { id: student.id })"
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >edit</span
-                            >
-                            <span class="ml-2">Update</span>
-                          </span>
-                        </Link>
-                      </li>
+                          <p @click="pay(student)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >money</span
+                              >
+                              <span class="ml-2">New payment</span>
+                            </span>
+                          </p>
+                        </li>
+                        <li>
+                          <Link
+                            :href="
+                              route('groups.create', { student: student.id })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >add_circle</span
+                              >
+                              <span class="ml-2">Add group</span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            :href="
+                              route('groups.index', {
+                                search: 'students:' + student.id,
+                              })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >list</span
+                              >
+                              <span class="ml-2">Groups</span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            :href="route('students.update', { id: student.id })"
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >edit</span
+                              >
+                              <span class="ml-2">Update</span>
+                            </span>
+                          </Link>
+                        </li>
 
-                      <li>
-                        <p @click="deleteStudent(student)">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >delete</span
-                            >
-                            <span class="ml-2">Delete</span>
-                          </span>
-                        </p>
-                      </li>
-                      <li>
-                        <Link :href="route('students.archive', student.id)">
-                          <span class="flex items-center">
-                            <span
-                              class="material-icons text-gray-400 text-xs"
-                              >{{
-                                student.archived ? "unarchive" : "inventory_2"
-                              }}</span
-                            >
-                            <span class="ml-2">{{
-                              student.archived ? "Unarchive" : "Archive"
-                            }}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    </ul>
+                        <li>
+                          <p @click="deleteStudent(student)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >delete</span
+                              >
+                              <span class="ml-2">Delete</span>
+                            </span>
+                          </p>
+                        </li>
+                        <li>
+                          <Link :href="route('students.archive', student.id)">
+                            <span class="flex items-center">
+                              <span
+                                class="material-icons text-gray-400 text-xs"
+                                >{{
+                                  student.archived ? "unarchive" : "inventory_2"
+                                }}</span
+                              >
+                              <span class="ml-2">{{
+                                student.archived ? "Unarchive" : "Archive"
+                              }}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
+              </td>
+            </tr>
+          </template>
+        </template>
+        <template v-else>
+          <tr>
+            <td colspan="100">
+              <div
+                class="
+                  p-8
+                  text-center
+                  border border-gray-200
+                  rounded-lg
+                  bg-white
+                  shadow
+                "
+              >
+                <h2 class="text-2xl font-bold">The list still empty!</h2>
+
+                <p class="mt-4 text-sm text-gray-500">Add a new student.</p>
+
+                <Link
+                  :href="route('students.create')"
+                  class="
+                    inline-flex
+                    items-center
+                    px-5
+                    py-3
+                    mt-8
+                    font-medium
+                    text-white
+                    bg-cyan-700
+                    rounded-lg
+                    hover:bg-cyan-600
+                  "
+                >
+                  Create a student
+                </Link>
               </div>
             </td>
           </tr>

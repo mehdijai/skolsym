@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Const\RefGenerator;
 use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
@@ -35,14 +34,14 @@ class DatabaseSeeder extends Seeder
         $teacher = Teacher::create([
             'name' => 'Mehdi Jai',
             'email' => 'mehdi.jai.mj@gmail.com',
-            'phone' => '0612113830'
+            'phone' => '0612113830',
         ]);
 
         $course = Course::create([
             'title' => 'Web development',
             'teacher_id' => $teacher->id,
             'teacher_percentage' => 0.3,
-            'price' => 500
+            'price' => 500,
         ]);
 
         $group = Group::create([
@@ -61,7 +60,6 @@ class DatabaseSeeder extends Seeder
         $student->groups()->attach($group->id);
 
         $payment = Payment::create([
-            'ref' => RefGenerator::generate(),
             'student_id' => $student->id,
             'course_id' => $course->id,
             'amount_payed' => $course->price,

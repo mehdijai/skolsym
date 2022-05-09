@@ -2,19 +2,21 @@
 namespace App\Const;
 
 use App\Models\Payment;
-use Illuminate\Support\Str;
 
 class RefGenerator
 {
     public static function generate()
     {
-        return strtoupper(Str::random(1)) . now()->getTimestamp();
+        $timestamp = now()->getTimestamp();
+        $val = dechex($timestamp + random_int(0, 9));
+        $val = hexdec($val);
+        $val = dechex($val + random_int(0, 9));
+        return strtoupper($val);
     }
 
     public static function exists($uuid)
     {
         return Payment::where('ref', $uuid)->count() > 0;
     }
-
 
 }

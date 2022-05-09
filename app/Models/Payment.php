@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use App\Const\StateLists;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use App\Const\RefGenerator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 
 class Payment extends Model
 {
@@ -15,7 +12,6 @@ class Payment extends Model
 
     protected $table = "payments";
     protected $fillable = [
-        'ref',
         'student_id',
         'course_id',
         'amount_payed',
@@ -24,6 +20,14 @@ class Payment extends Model
         'archived',
         'archived_at',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+        self::creating(function ($model) {
+            $model->ref = RefGenerator::generate();
+        });
+    }
 
     public function student()
     {

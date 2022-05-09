@@ -107,190 +107,234 @@ const confirmDeletion = () => {
         </tr>
       </thead>
       <tbody>
-        <template v-for="group in groups" :key="group.id">
-          <tr
-            :class="
-              group.state === 'removed'
-                ? 'bg-red-50'
-                : group.archived
-                ? 'bg-orange-50'
-                : 'bg-white'
-            "
-          >
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="route('groups.view', [group.id])"
-                  class="font-bold text-gray-900 whitespace-no-wrap"
-                >
-                  {{ group.title }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.index', {
-                      search: 'course:' + group.course.id,
-                    })
-                  "
-                  class="
-                    text-cyan-600
-                    hover:text-cyan-800
-                    whitespace-no-wrap
-                    flex
-                    items-center
-                    font-semibold
-                  "
-                >
-                  {{ group.course.title }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('students.index', { search: 'groups:' + group.id })
-                  "
-                  class="font-semibold whitespace-no-wrap"
-                >
-                  {{ group.students_count }} student{{
-                    Number(group.students_count) > 1 ? "s" : ""
-                  }}
-                </Link>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <Link
-                  :href="
-                    route('groups.index', {
-                      filter:
+        <template v-if="groups.length > 0">
+          <template v-for="group in groups" :key="group.id">
+            <tr
+              :class="
+                group.state === 'removed'
+                  ? 'bg-red-50'
+                  : group.archived
+                  ? 'bg-orange-50'
+                  : 'bg-white'
+              "
+            >
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="route('groups.view', [group.id])"
+                    class="font-bold text-gray-900 whitespace-no-wrap"
+                  >
+                    {{ group.title }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.index', {
+                        search: 'course:' + group.course.id,
+                      })
+                    "
+                    class="
+                      text-cyan-600
+                      hover:text-cyan-800
+                      whitespace-no-wrap
+                      flex
+                      items-center
+                      font-semibold
+                    "
+                  >
+                    {{ group.course.title }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('students.index', { search: 'groups:' + group.id })
+                    "
+                    class="font-semibold whitespace-no-wrap"
+                  >
+                    {{ group.students_count }} student{{
+                      Number(group.students_count) > 1 ? "s" : ""
+                    }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('groups.index', {
+                        filter:
+                          group.state === 'removed'
+                            ? group.state
+                            : group.archived
+                            ? 'archived'
+                            : group.state,
+                      })
+                    "
+                  >
+                    <TagPill
+                      :value="
                         group.state === 'removed'
                           ? group.state
                           : group.archived
                           ? 'archived'
-                          : group.state,
-                    })
-                  "
-                >
-                  <TagPill
-                    :value="
-                      group.state === 'removed'
-                        ? group.state
-                        : group.archived
-                        ? 'archived'
-                        : group.state
-                    "
-                  />
-                </Link>
-              </div>
-            </td>
-            <td v-if="groups.length > 0 ? groups[0].revenue : false">
-              <span class="font-semibold text-orange-700">
-                {{ group.revenue }} DH
-              </span>
-            </td>
-            <td>
-              <div class="flex items-center">
-                <div class="ml-3 relative">
-                  <div class="dropdown dropdown-end">
-                    <label
-                      tabindex="0"
-                      class="
-                        material-icons
-                        bg-gray-200
-                        rounded-full
-                        px-2
-                        cursor-pointer
-                        hover:bg-gray-300
+                          : group.state
                       "
-                    >
-                      more_horiz
-                    </label>
-                    <ul
-                      tabindex="0"
-                      class="
-                        dropdown-content
-                        menu
-                        z-40
-                        shadow
-                        bg-base-100
-                        rounded-md
-                        w-52
-                      "
-                    >
-                      <li v-if="!group.archived">
-                        <Link
-                          :href="route('students.create', { group: group.id })"
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >add_circle</span
-                            >
-                            <span class="ml-2">Add student</span>
-                          </span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          :href="
-                            route('students.index', {
-                              search: 'groups:' + group.id,
-                            })
-                          "
-                        >
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >list</span
-                            >
-                            <span class="ml-2">Students</span>
-                          </span>
-                        </Link>
-                      </li>
+                    />
+                  </Link>
+                </div>
+              </td>
+              <td v-if="groups.length > 0 ? groups[0].revenue : false">
+                <span class="font-semibold text-orange-700">
+                  {{ group.revenue }} DH
+                </span>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <div class="ml-3 relative">
+                    <div class="dropdown dropdown-end">
+                      <label
+                        tabindex="0"
+                        class="
+                          material-icons
+                          bg-gray-200
+                          rounded-full
+                          px-2
+                          cursor-pointer
+                          hover:bg-gray-300
+                        "
+                      >
+                        more_horiz
+                      </label>
+                      <ul
+                        tabindex="0"
+                        class="
+                          dropdown-content
+                          menu
+                          z-40
+                          shadow
+                          bg-base-100
+                          rounded-md
+                          w-52
+                        "
+                      >
+                        <li v-if="!group.archived">
+                          <Link
+                            :href="
+                              route('students.create', { group: group.id })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >add_circle</span
+                              >
+                              <span class="ml-2">Add student</span>
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            :href="
+                              route('students.index', {
+                                search: 'groups:' + group.id,
+                              })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >list</span
+                              >
+                              <span class="ml-2">Students</span>
+                            </span>
+                          </Link>
+                        </li>
 
-                      <li>
-                        <Link :href="route('groups.update', { id: group.id })">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >edit</span
-                            >
-                            <span class="ml-2">Update</span>
-                          </span>
-                        </Link>
-                      </li>
+                        <li>
+                          <Link
+                            :href="route('groups.update', { id: group.id })"
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >edit</span
+                              >
+                              <span class="ml-2">Update</span>
+                            </span>
+                          </Link>
+                        </li>
 
-                      <li>
-                        <p @click="deleteGroup(group)">
-                          <span class="flex items-center">
-                            <span class="material-icons text-gray-400 text-xs"
-                              >delete</span
-                            >
-                            <span class="ml-2">Delete</span>
-                          </span>
-                        </p>
-                      </li>
+                        <li>
+                          <p @click="deleteGroup(group)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >delete</span
+                              >
+                              <span class="ml-2">Delete</span>
+                            </span>
+                          </p>
+                        </li>
 
-                      <li>
-                        <Link :href="route('groups.archive', group.id)">
-                          <span class="flex items-center">
-                            <span
-                              class="material-icons text-gray-400 text-xs"
-                              >{{
-                                group.archived ? "unarchive" : "inventory_2"
-                              }}</span
-                            >
-                            <span class="ml-2">{{
-                              group.archived ? "Unarchive" : "Archive"
-                            }}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    </ul>
+                        <li>
+                          <Link :href="route('groups.archive', group.id)">
+                            <span class="flex items-center">
+                              <span
+                                class="material-icons text-gray-400 text-xs"
+                                >{{
+                                  group.archived ? "unarchive" : "inventory_2"
+                                }}</span
+                              >
+                              <span class="ml-2">{{
+                                group.archived ? "Unarchive" : "Archive"
+                              }}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
+              </td>
+            </tr>
+          </template>
+        </template>
+        <template v-else>
+          <tr>
+            <td colspan="100">
+              <div
+                class="
+                  p-8
+                  text-center
+                  border border-gray-200
+                  rounded-lg
+                  bg-white
+                  shadow
+                "
+              >
+                <h2 class="text-2xl font-bold">The list still empty!</h2>
+
+                <p class="mt-4 text-sm text-gray-500">Add a new group.</p>
+
+                <Link
+                  :href="route('groups.create')"
+                  class="
+                    inline-flex
+                    items-center
+                    px-5
+                    py-3
+                    mt-8
+                    font-medium
+                    text-white
+                    bg-cyan-700
+                    rounded-lg
+                    hover:bg-cyan-600
+                  "
+                >
+                  Create a group
+                </Link>
               </div>
             </td>
           </tr>
