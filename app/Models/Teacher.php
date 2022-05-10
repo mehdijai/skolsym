@@ -20,30 +20,31 @@ class Teacher extends Model
         'archived',
         'archived_at',
     ];
-    // protected $appends = ['month_revenue'];
 
-    // protected function MonthRevenue(): Attribute
-    // {
-    //     return new Attribute(
-    //         get:function () {
-    //             $coursesIDs = collect($this->courses()->select('id')->get()->toArray())->flatten();
-    //             $currentMonthPayments = Payment::whereIn('course_id', $coursesIDs)
-    //                 ->currentMonth()
-    //                 ->get()
-    //                 ->append('teacher_revenue')
-    //                 ->toArray();
+    protected $appends = ['month_revenue'];
 
-    //             $revenues = array_map(function ($p) {
-    //                 return $p['teacher_revenue'];
-    //             }, $currentMonthPayments);
+    protected function MonthRevenue(): Attribute
+    {
+        return new Attribute(
+            get:function () {
+                $courses = $this->courses()
+                    ->get()
+                    ->append('month_revenue')
+                    ->toArray();
 
-    //             return array_reduce($revenues, function ($c, $i) {
-    //                 $c += $i;
-    //                 return $c;
-    //             });
-    //         },
-    //     );
-    // }
+                $paidByCourse = array_map(function ($p) {
+                    return $p['month_revenue'] * $p['teacher_percentage'];
+                }, $courses);
+
+                $paidByTeacher = array_reduce($paidByCourse, function ($c, $i) {
+                    $c += $i;
+                    return $c;
+                });
+
+                return $paidByTeacher;
+            },
+        );
+    }
 
     public function courses(): HasMany
     {

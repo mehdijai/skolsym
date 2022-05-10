@@ -44,7 +44,7 @@ const props = defineProps({
                 :href="route('students.create')"
                 >Create new student</Link
               >
-              <FilterSystem model="students" :states="states" />
+              <FilterSystem :states="states" />
             </div>
           </template>
         </StudentTable>

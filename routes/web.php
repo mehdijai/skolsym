@@ -6,6 +6,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Models\Group;
+use App\Models\Teacher;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -104,9 +105,8 @@ Route::middleware([
 });
 
 Route::get('/test', function () {
-    $query = Group::query()->with('course')->withCount('students');
+    $teachers = Teacher::all();
+    $teachers->append('month_revenue');
 
-    $groups = $query->get()->append('month_revenue')->forget("students");
-
-    dd($groups->toArray());
+    dd($teachers->toArray());
 });

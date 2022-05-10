@@ -48,7 +48,7 @@ class CourseController extends Controller
         }
 
         return Inertia::render('Course/Show', [
-            'courses' => $query->get(),
+            'courses' => $query->get()->append('month_revenue'),
             'states' => array_merge(['', 'archived'], array_values(StateLists::COURSE)),
         ]);
     }

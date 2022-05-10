@@ -39,7 +39,7 @@ class TeacherController extends Controller
         }
 
         return Inertia::render('Teacher/Show', [
-            'teachers' => $query->get(),
+            'teachers' => $query->get()->append('month_revenue'),
             'states' => array_merge(['', 'archived'], array_values(StateLists::TEACHER)),
         ]);
     }
@@ -65,13 +65,17 @@ class TeacherController extends Controller
                 ->with('course')
                 ->whereRelation('course.teacher', 'id', $id)
                 ->withCount('students')
-                ->get(),
+                ->get()
+                ->append('month_revenue'),
             'students' => Student::query()
-                ->with('groups.course.payments', function ($q) {
-                    $q->latest();
-                })
+                ->with([
+                    'payments' => fn($q) => $q->currentMonth()->latest(),
+                ])
+                ->with('groups.course.payments')
                 ->whereRelation('groups.course.teacher', 'id', $id)
-                ->get(),
+                ->get()
+                ->append('month_paid'),
+
         ]);
     }
 

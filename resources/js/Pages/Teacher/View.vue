@@ -45,9 +45,10 @@ const confirmDeletion = () => {
 };
 
 const tab = computed(() => {
-  return window.location.hash != '' ? window.location.hash.replace('#', '') : "courses"
-})
-
+  return window.location.hash != ""
+    ? window.location.hash.replace("#", "")
+    : "courses";
+});
 </script>
 
 <template>
@@ -101,7 +102,18 @@ const tab = computed(() => {
     </RemoveCard>
 
     <div class="grid grid-cols-12">
-      <div class="max-w-sm col-span-2 flex flex-col items-center gap-y-4 p-4 min-h-screen h-full">
+      <div
+        class="
+          max-w-sm
+          col-span-2
+          flex flex-col
+          items-center
+          gap-y-4
+          p-4
+          min-h-screen
+          h-full
+        "
+      >
         <div class="pb-4 mt-4 border-b-2 border-b-gray-300">
           <h2 class="text-2xl break-all font-bold text-gray-600 capitalize">
             {{ teacher.name }}
@@ -127,8 +139,20 @@ const tab = computed(() => {
             "
           >
             <div class="flex items-center">
-              <span class="material-icons bg-orange-200 text-orange-600 p-2 rounded-lg text-xs">attach_money</span>
-              <p class="text-md text-black dark:text-white ml-2">Total Revenue</p>
+              <span
+                class="
+                  material-icons
+                  bg-orange-200
+                  text-orange-600
+                  p-2
+                  rounded-lg
+                  text-xs
+                "
+                >attach_money</span
+              >
+              <p class="text-md text-black dark:text-white ml-2">
+                Total Revenue
+              </p>
             </div>
             <div class="flex flex-col justify-start">
               <p
@@ -140,7 +164,7 @@ const tab = computed(() => {
                   my-4
                 "
               >
-                {{teacher.month_revenue}}
+                {{ teacher.month_revenue }}
                 <span class="text-sm"> DH </span>
               </p>
               <div class="flex items-center text-green-500 text-sm">
@@ -163,8 +187,20 @@ const tab = computed(() => {
             "
           >
             <div class="flex items-center">
-              <span class="material-icons bg-purple-200 text-purple-600 p-2 rounded-lg text-xs">group</span>
-              <p class="text-md text-black dark:text-white ml-2">Total Students</p>
+              <span
+                class="
+                  material-icons
+                  bg-purple-200
+                  text-purple-600
+                  p-2
+                  rounded-lg
+                  text-xs
+                "
+                >group</span
+              >
+              <p class="text-md text-black dark:text-white ml-2">
+                Total Students
+              </p>
             </div>
             <div class="flex flex-col justify-start">
               <p
@@ -176,7 +212,7 @@ const tab = computed(() => {
                   my-4
                 "
               >
-                {{students.length}}
+                {{ students.length }}
               </p>
               <div class="flex items-center text-green-500 text-sm">
                 <span class="material-icons text-green-600">arrow_drop_up</span>
@@ -258,7 +294,7 @@ const tab = computed(() => {
               >Courses</Link
             >
             <Link
-            href="#groups"
+              href="#groups"
               class="tab tab-bordered"
               :class="tab === 'groups' ? 'tab-active' : ''"
               >Groups</Link

@@ -44,7 +44,7 @@ const props = defineProps({
                 :href="route('groups.create')"
                 >Create new group</Link
               >
-              <FilterSystem model="groups" :states="states" />
+              <FilterSystem :states="states" />
             </div>
           </template>
         </GroupTable>

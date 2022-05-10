@@ -25,28 +25,30 @@ class Course extends Model
         'archived_at',
     ];
 
-    // protected $appends = ['month_revenue'];
+    protected $appends = ['month_revenue'];
 
-    // protected function Revenue(): Attribute
-    // {
-    //     return new Attribute(
-    //         get:function () {
-    //             $currentMonthPayments = Payment::where('course_id', $this->id)
-    //                 ->currentMonth()
-    //                 ->get()
-    //                 ->toArray();
+    protected function MonthRevenue(): Attribute
+    {
+        return new Attribute(
+            get:function () {
+                $groups = $this->groups()
+                    ->get()
+                    ->append('month_revenue')
+                    ->toArray();
 
-    //             $revenues = array_map(function ($p) {
-    //                 return $p['teacher_part'];
-    //             }, $currentMonthPayments);
+                $paidByGroups = array_map(function ($p) {
+                    return $p['month_revenue'];
+                }, $groups);
 
-    //             return array_reduce($revenues, function ($c, $i) {
-    //                 $c += $i;
-    //                 return $c;
-    //             });
-    //         },
-    //     );
-    // }
+                $paidByCourse = array_reduce($paidByGroups, function ($c, $i) {
+                    $c += $i;
+                    return $c;
+                });
+
+                return $paidByCourse;
+            },
+        );
+    }
 
     public function groups(): HasMany
     {

@@ -188,13 +188,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <p class="text-green-500 font-bold">
-                    {{
-                      groups.reduce(
-                        (p, c) =>
-                          p.reduce((p, c) => p + c) + c.reduce((p, c) => p + c)
-                      )
-                    }}
-                    DH
+                    {{ teacher.month_revenue }} DH
                   </p>
                 </div>
               </td>

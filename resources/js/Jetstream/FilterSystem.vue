@@ -6,8 +6,7 @@ import { ref } from "@vue/reactivity";
 import { Inertia } from "@inertiajs/inertia";
 
 const props = defineProps({
-  model: String,
-  states: Object
+  states: Object,
 });
 
 const filter = ref(route().params.filter ?? "");
@@ -21,7 +20,8 @@ const filterState = () => {
   if (search.value !== "") {
     params.search = search.value;
   }
-  Inertia.get(route(props.model + ".index", params));
+
+  Inertia.get(window.location.origin + window.location.pathname, params);
 };
 </script>
 

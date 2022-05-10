@@ -116,19 +116,47 @@ class GroupController extends Controller
     // }
     public function view($id)
     {
-        $group = Group::with([
-            'students' => fn($q) => $q->withCount('groups'),
-            'students.payments' => fn($q) => $q->currentMonth()->latest(),
-        ])
+        $query = Group::query()
+            ->with([
+                'students' => function ($query) {
+                    $query->withCount('groups');
+                    if (request('search')) {
+
+                        $query->where(function ($query) {
+                            $query->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
+                                ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
+                                ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
+                                ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
+                                ->orWhere('name', 'LIKE', '%' . request('search') . '%')
+                                ->orWhere('email', 'LIKE', '%' . request('search') . '%')
+                                ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
+                                ->orWhere('age', 'LIKE', '%' . request('search') . '%')
+                                ->orWhere('grade', 'LIKE', '%' . request('search') . '%');
+                        });
+                    }
+
+                    if (request('payment')) {
+                        $query->where(function ($query) {
+                            $query->whereRelation('payments', 'state', request('search'));
+                        });
+                    }
+
+                    if (in_array(request('filter'), StateLists::STUDENT)) {
+                        $query->where('state', request('filter'))
+                            ->orWhereRelation('students.payments', 'state', request('filter'));
+                    }
+
+                    if (request('filter') == 'archived') {
+                        $query->where('archived', true);
+                    }
+                },
+                'students.payments' => fn($q) => $q->currentMonth()->latest(),
+            ])
             ->with('course')
-            ->find($id)
-            ->append('month_revenue');
+            ->where('id', $id);
 
+        $group = $query->first()->append('month_revenue');
         $group->students()->get()->append('month_paid');
-
-        if (!$group) {
-            abort(404, "This group doesn't exist in our records");
-        }
 
         return Inertia::render('Group/View', [
             'group' => $group,

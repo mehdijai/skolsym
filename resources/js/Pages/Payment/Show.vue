@@ -44,7 +44,7 @@ const props = defineProps({
                 :href="route('payments.create')"
                 >Create new payment</Link
               >
-              <FilterSystem model="payments" :states="states" />
+              <FilterSystem :states="states" />
             </div>
           </template>
         </PaymentTable>

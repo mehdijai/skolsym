@@ -42,7 +42,7 @@ defineProps({
                 :href="route('teachers.create')"
                 >Add new teacher</Link
               >
-              <FilterSystem model="teachers" :states="states" />
+              <FilterSystem :states="states" />
             </div>
           </template>
         </TeacherTable>
