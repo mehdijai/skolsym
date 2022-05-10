@@ -52,8 +52,7 @@ class TeacherController extends Controller
                 $query->withCount('groups');
                 $query->selectSub('100', 'revenue');
             },
-        ])
-            ->find($id);
+        ])->find($id);
 
         if (empty($teacher)) {
             abort(404, "This teacher doesn't exist in our records");
@@ -62,7 +61,11 @@ class TeacherController extends Controller
         return Inertia::render('Teacher/View', [
             'teacher' => $teacher,
             'teachers' => Teacher::select(['id', 'name'])->withCount('courses')->where('id', '!=', $id)->get(),
-            'groups' => Group::query()->with('course')->whereRelation('course.teacher', 'id', $id)->withCount('students')->get(),
+            'groups' => Group::query()
+                ->with('course')
+                ->whereRelation('course.teacher', 'id', $id)
+                ->withCount('students')
+                ->get(),
             'students' => Student::query()
                 ->with('groups.course.payments', function ($q) {
                     $q->latest();

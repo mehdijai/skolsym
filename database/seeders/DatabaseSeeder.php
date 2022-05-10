@@ -25,16 +25,16 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => "Mehdi Jai",
-            'email' => "mehdi.jai.mj@gmail.com",
+            'email' => "mehdi_jai@outlook.fr",
             'email_verified_at' => now(),
             'password' => Hash::make("123456789"),
             'remember_token' => Str::random(10),
         ]);
 
         $teacher = Teacher::create([
-            'name' => 'Mehdi Jai',
-            'email' => 'mehdi.jai.mj@gmail.com',
-            'phone' => '0612113830',
+            'name' => 'Nour Homsi',
+            'email' => 'nour.homsi@gmail.com',
+            'phone' => '07896325',
         ]);
 
         $course = Course::create([
@@ -50,8 +50,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $student = Student::create([
-            'name' => 'Mehdi Jai',
-            'email' => 'mehdi.jai.mj@gmail.com',
+            'name' => 'Hossam Jai',
+            'email' => 'hossam.jai@gmail.com',
             'phone' => '0612113830',
             'age' => 23,
             'grade' => 'bac+3',
@@ -63,6 +63,7 @@ class DatabaseSeeder extends Seeder
             'student_id' => $student->id,
             'course_id' => $course->id,
             'amount_payed' => $course->price,
+            'teacher_part' => $course->price * $course->teacher_percentage,
             'state' => StateLists::PAYMENT['PAID'],
             'paid_at' => now(),
         ]);

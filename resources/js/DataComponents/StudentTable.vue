@@ -67,6 +67,25 @@ function getCourses(student) {
   return courses;
 }
 
+const completePayment = useForm({
+  id: null,
+  price: null,
+  teacher_percentage: null,
+});
+
+const payPending = (payment) => {
+  completePayment.id = payment.id;
+  if (props.group != null) {
+    completePayment.price = props.group.course.price;
+    completePayment.teacher_percentage = props.group.course.teacher_percentage;
+  }
+  completePayment.post(route("payments.pay"), {
+    onSuccess: () => {
+      completePayment.reset();
+    },
+  });
+};
+
 const pay = (student) => {
   if (props.group != null) {
     payForm.student_id = student.id;
@@ -259,6 +278,7 @@ onMounted(() => {
           <th scope="col">Grade</th>
           <th scope="col">{{ group != null ? "Other groups" : "Groups" }}</th>
           <th scope="col">Payment State</th>
+          <th scope="col">Total Paid</th>
           <th scope="col">State</th>
           <th scope="col">Actions</th>
         </tr>
@@ -340,14 +360,8 @@ onMounted(() => {
                     "
                     class="font-semibold whitespace-no-wrap"
                   >
-                    {{ student.groups.filter((g) => g.id != group.id).length }}
-                    group{{
-                      Number(
-                        student.groups.filter((g) => g.id != group.id).length
-                      ) > 1
-                        ? "s"
-                        : ""
-                    }}
+                    {{ student.groups_count - 1 }}
+                    group{{ Number(student.groups_count - 1) > 1 ? "s" : "" }}
                   </Link>
                 </div>
               </td>
@@ -375,9 +389,8 @@ onMounted(() => {
                         group.id,
                         {
                           search:
-                            group.course.payments.length > 0 &&
-                            group.course.payments[0].student_id === student.id
-                              ? group.course.payments[0].state
+                            student.payments.length > 0
+                              ? student.payments[0].state
                               : 'pending',
                         },
                       ])
@@ -385,9 +398,8 @@ onMounted(() => {
                   >
                     <TagPill
                       :value="
-                        group.course.payments.length > 0 &&
-                        group.course.payments[0].student_id === student.id
-                          ? group.course.payments[0].state
+                        student.payments.length > 0
+                          ? student.payments[0].state
                           : 'pending'
                       "
                     />
@@ -443,30 +455,34 @@ onMounted(() => {
                           class="link font-bold"
                           >{{ group.title }}</Link
                         >
-
+                        <span class="font-bold text-orange-600">
+                          {{
+                            student.month_paid * group.course.teacher_percentage
+                          }}
+                          DH
+                        </span>
                         <Link
                           :href="
                             route('students.index', {
                               filter:
-                                group.course.payments.length > 0 &&
-                                group.course.payments[0].student_id ===
-                                  student.id
-                                  ? group.course.payments[0].state
+                                group.course.payments.find(
+                                  (p) => p.student_id == student.id
+                                ) != undefined
+                                  ? group.course.payments.find(
+                                      (p) => p.student_id == student.id
+                                    ).state
                                   : 'pending',
                             })
                           "
                         >
                           <TagPill
                             :value="
-                              group.course.payments.length > 0 &&
-                              group.course.payments[0].student_id === student.id
-                                ? group.course.payments[0].amount_payed ==
-                                  group.course.price
-                                  ? group.course.payments[0].state
-                                  : `pending (-${
-                                      group.course.price -
-                                      group.course.payments[0].amount_payed
-                                    } DH)`
+                              group.course.payments.find(
+                                (p) => p.student_id == student.id
+                              ) != undefined
+                                ? group.course.payments.find(
+                                    (p) => p.student_id == student.id
+                                  ).state
                                 : 'pending'
                             "
                           />
@@ -474,6 +490,20 @@ onMounted(() => {
                       </li>
                     </template>
                   </ul>
+                </div>
+              </td>
+              <td class="w-fit break-normal">
+                <div class="flex items-center w-full">
+                  <span class="font-semibold text-sm text-green-700">
+                    {{ student.month_paid }} DH
+                  </span>
+                  <template v-if="group != null">
+                    <span class="font-regular text-xs mx-1">/</span>
+                    <span class="font-semibold text-sm text-orange-700">
+                      {{ student.month_paid * group.course.teacher_percentage }}
+                      DH
+                    </span>
+                  </template>
                 </div>
               </td>
               <td>
@@ -533,17 +563,20 @@ onMounted(() => {
                       >
                         <li
                           v-if="
-                            group == null
-                              ? student.payments.length == 0 ||
-                                student.payments.find(
-                                  (p) => p.state != 'paid'
-                                ) != undefined
-                              : group.course.payments.length == 0 ||
-                                group.course.payments.find(
-                                  (p) => p.state != 'paid'
-                                )
+                            student.payments.length > 0 &&
+                            student.payments[0].state != 'paid'
                           "
                         >
+                          <p @click="payPending(student.payments[0])">
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >money</span
+                              >
+                              <span class="ml-2">Pay</span>
+                            </span>
+                          </p>
+                        </li>
+                        <li v-if="student.payments.length == 0">
                           <p @click="pay(student)">
                             <span class="flex items-center">
                               <span class="material-icons text-gray-400 text-xs"

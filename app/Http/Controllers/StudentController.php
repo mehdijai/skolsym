@@ -18,9 +18,11 @@ class StudentController extends Controller
     {
         $allowed = ['groups', 'groups.course', 'groups.course.teacher'];
 
-        $query = Student::query()->with('groups.course.payments', function($q){
-            $q->latest();
-        });
+        $query = Student::query()
+        ->with(['payments' => function($q){
+            $q->currentMonth()->latest();
+        }])
+        ->with('groups.course.payments');
 
         if (request('search')) {
             if (strpos(request('search'), ':') !== false) {
@@ -53,11 +55,7 @@ class StudentController extends Controller
             $query->where('archived', true);
         }
 
-        $query->with(['payments' => function ($q) {
-            $q->where('created_at', '>=', Carbon::now()->subMonth())->with('course', function($c){
-                $c->select('id', 'price');
-            })->latest()->first();
-        }]);
+        
 
         return Inertia::render('Student/Show', [
             'students' => $query->get(),

@@ -35,7 +35,7 @@ const cancelDeletion = () => {
 
 const form = useForm({
   id: String(props.teacher.id),
-  assign_to: String(props.teachers[0].id) ?? null,
+  assign_to: props.teachers.length > 0 ? String(props.teachers[0].id) : null,
 });
 
 const confirmDeletion = () => {
@@ -140,8 +140,8 @@ const tab = computed(() => {
                   my-4
                 "
               >
-                {{teacher.courses.map((v) => v.revenue).reduce((p,c) => p + c, 0)}}
-                <span class="text-sm"> $ </span>
+                {{teacher.month_revenue}}
+                <span class="text-sm"> DH </span>
               </p>
               <div class="flex items-center text-green-500 text-sm">
                 <span class="material-icons text-green-600">arrow_drop_up</span>
@@ -248,8 +248,8 @@ const tab = computed(() => {
           </Link>
         </div>
       </div>
-      <div class="col-span-7 p-4">
-        <div class="mx-auto max-w-5xl">
+      <div class="col-span-10 p-4">
+        <div class="mx-auto">
           <div class="tabs w-fit mx-auto">
             <Link
               href="#courses"
@@ -340,11 +340,6 @@ const tab = computed(() => {
             </StudentTable>
           </div>
         </div>
-      </div>
-      <div class="col-span-3 p-4 flex flex-col items-center gap-y-4">
-        <Calendar />
-
-        <TodoList />
       </div>
     </div>
   </AppLayout>

@@ -100,9 +100,7 @@ const confirmDeletion = () => {
           <th scope="col">Course</th>
           <th scope="col">Students</th>
           <th scope="col">State</th>
-          <th v-if="groups.length > 0 ? groups[0].revenue : false" scope="col">
-            Revenue
-          </th>
+          <th scope="col">Revenue</th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
@@ -189,9 +187,15 @@ const confirmDeletion = () => {
                   </Link>
                 </div>
               </td>
-              <td v-if="groups.length > 0 ? groups[0].revenue : false">
+              <td>
+                <span class="font-semibold text-green-700">
+                  {{ group.month_revenue }} DH
+                </span>
+                <span class="font-regular mx-1">
+                  /
+                </span>
                 <span class="font-semibold text-orange-700">
-                  {{ group.revenue }} DH
+                  {{ group.month_revenue * group.course.teacher_percentage }} DH
                 </span>
               </td>
               <td>

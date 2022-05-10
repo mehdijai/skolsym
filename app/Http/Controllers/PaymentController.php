@@ -69,6 +69,7 @@ class PaymentController extends Controller
                 'student_id' => $validated['student_id'],
                 'course_id' => $course['id'],
                 'amount_payed' => $course['price'],
+                'teacher_part' => $course['price'] * $course['teacher_percentage'],
                 'state' => StateLists::PAYMENT['PAID'],
                 'paid_at' => now(),
             ]);
@@ -94,6 +95,13 @@ class PaymentController extends Controller
 
     public function pay(Request $request)
     {
+        $payment = Payment::findOrFail($request->id);
+        $payment->state = "paid";
+        $payment->amount_payed = $request->price;
+        $payment->teacher_part = $request->price * $request->teacher_percentage;
+        $payment->paid_at = now();
+        $payment->save();
 
+        return redirect()->back();
     }
 }

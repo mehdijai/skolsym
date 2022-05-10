@@ -89,6 +89,7 @@ const confirmDeletion = () => {
           <th scope="col">Phone</th>
           <th scope="col">Courses</th>
           <th scope="col">Status</th>
+          <th scope="col">Month $</th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
@@ -182,6 +183,19 @@ const confirmDeletion = () => {
                       "
                     />
                   </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p class="text-green-500 font-bold">
+                    {{
+                      groups.reduce(
+                        (p, c) =>
+                          p.reduce((p, c) => p + c) + c.reduce((p, c) => p + c)
+                      )
+                    }}
+                    DH
+                  </p>
                 </div>
               </td>
               <td>

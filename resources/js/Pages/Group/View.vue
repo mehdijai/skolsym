@@ -10,7 +10,6 @@ import { computed } from "@vue/runtime-core";
 
 const props = defineProps({
   group: Object,
-  students: Object,
   states: Object,
 });
 </script>
@@ -29,7 +28,7 @@ const props = defineProps({
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <StudentTable :group="group" :students="students">
+        <StudentTable :group="group" :students="group.students">
           <template #header>
             <div
               class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full"

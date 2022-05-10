@@ -1,11 +1,11 @@
 <?php
 
-use App\Const\RefGenerator;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
+use App\Models\Group;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -104,5 +104,9 @@ Route::middleware([
 });
 
 Route::get('/test', function () {
-    dd(RefGenerator::generate());
+    $query = Group::query()->with('course')->withCount('students');
+
+    $groups = $query->get()->append('month_revenue')->forget("students");
+
+    dd($groups->toArray());
 });

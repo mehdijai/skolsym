@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\Models\Course;
-use App\Models\Student;
 use App\Models\GroupStudent;
+use App\Models\Student;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Group extends Model
@@ -23,21 +24,36 @@ class Group extends Model
         'archived_at',
     ];
 
-    /**
-     * Get the user that owns the Group
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
+    protected $appends = ['month_revenue'];
+
+    protected function MonthRevenue(): Attribute
+    {
+        return new Attribute(
+            get:function () {
+                $students = $this->students()
+                    ->get()
+                    ->append('month_paid')
+                    ->toArray();
+
+                $paidByStudents = array_map(function ($p) {
+                    return $p['month_paid'];
+                }, $students);
+
+                $paidByGroup = array_reduce($paidByStudents, function ($c, $i) {
+                    $c += $i;
+                    return $c;
+                });
+
+                return $paidByGroup;
+            },
+        );
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    /**
-     * The roles that belong to the Group
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class)->using(GroupStudent::class)->withPivot('certificate');

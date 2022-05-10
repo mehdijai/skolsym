@@ -7,7 +7,6 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupStudent;
 use App\Models\Student;
-use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -47,66 +46,91 @@ class GroupController extends Controller
             $query->where('archived', true);
         }
 
+        $groups = $query->get()->append('month_revenue')->forget("students");
+
         return Inertia::render('Group/Show', [
-            'groups' => $query->get(),
+            'groups' => $groups,
             'states' => array_merge(['', 'archived'], array_values(StateLists::GROUP)),
         ]);
     }
 
+    // public function view($id)
+    // {
+    //     $group = Group::with(['course.payments' => fn($q) =>
+    //         $q->currentMonth()->latest(),
+    //     ])
+    //         ->find($id)
+    //         ->append('month_revenue');
+
+    //     if (!$group) {
+    //         abort(404, "This group doesn't exist in our records");
+    //     }
+
+    //     $query = Student::query()
+    //         ->with(['groups', 'payments' => function ($q) {
+    //             $q->currentMonth()->latest();
+    //         }])
+    //         ->whereRelation('groups', 'group_id', $id);
+
+    //     if (request('search')) {
+
+    //         $query->where(function ($query) {
+    //             $query->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhere('name', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhere('email', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhere('age', 'LIKE', '%' . request('search') . '%')
+    //                 ->orWhere('grade', 'LIKE', '%' . request('search') . '%');
+    //         });
+    //     }
+
+    //     if (request('payment')) {
+    //         $query->where(function ($query) {
+    //             $query->whereRelation('payments', 'state', request('search'));
+    //         });
+    //     }
+
+    //     if (in_array(request('filter'), StateLists::STUDENT)) {
+    //         $query->where('state', request('filter'))
+    //             ->orWhereRelation('students.payments', 'state', request('filter'));
+    //     }
+
+    //     if (request('filter') == 'archived') {
+    //         $query->where('archived', true);
+    //     }
+
+    //     $query->with(['payments' => function ($q) {
+    //         $q->currentMonth()->with('course', function ($c) {
+    //             $c->select('id', 'price');
+    //         })->latest()->first();
+    //     }]);
+
+    //     return Inertia::render('Group/View', [
+    //         'students' => $query->get()->append('month_paid'),
+    //         'group' => $group,
+    //         'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT)),
+    //     ]);
+    // }
     public function view($id)
     {
-        $group = Group::with(['course.payments' => function ($q) {
-            $q->latest();
-        }])->find($id);
+        $group = Group::with([
+            'students' => fn($q) => $q->withCount('groups'),
+            'students.payments' => fn($q) => $q->currentMonth()->latest(),
+        ])
+            ->with('course')
+            ->find($id)
+            ->append('month_revenue');
+
+        $group->students()->get()->append('month_paid');
 
         if (!$group) {
             abort(404, "This group doesn't exist in our records");
         }
 
-        $query = Student::query()
-            ->with(['groups', 'payments' => function ($q) {
-                $q->latest();
-            }])
-            ->whereRelation('groups', 'group_id', $id);
-
-        if (request('search')) {
-
-            $query->where(function ($query) {
-                $query->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
-                    ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                    ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
-                    ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('name', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('email', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('age', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('grade', 'LIKE', '%' . request('search') . '%');
-            });
-        }
-
-        if (request('payment')) {
-            $query->where(function ($query) {
-                $query->whereRelation('payments', 'state', request('search'));
-            });
-        }
-
-        if (in_array(request('filter'), StateLists::STUDENT)) {
-            $query->where('state', request('filter'))
-                ->orWhereRelation('students.payments', 'state', request('filter'));
-        }
-
-        if (request('filter') == 'archived') {
-            $query->where('archived', true);
-        }
-
-        $query->with(['payments' => function ($q) {
-            $q->where('created_at', '>=', Carbon::now()->subMonth())->with('course', function ($c) {
-                $c->select('id', 'price');
-            })->latest()->first();
-        }]);
-
         return Inertia::render('Group/View', [
-            'students' => $query->get(),
             'group' => $group,
             'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT)),
         ]);

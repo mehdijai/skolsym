@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Const\RefGenerator;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,7 @@ class Payment extends Model
         'student_id',
         'course_id',
         'amount_payed',
+        'teacher_part',
         'state',
         'paid_at',
         'archived',
@@ -27,6 +29,11 @@ class Payment extends Model
         self::creating(function ($model) {
             $model->ref = RefGenerator::generate();
         });
+    }
+
+    public function scopeCurrentMonth($query)
+    {
+        $query->where('created_at', '>', now()->subMonth());
     }
 
     public function student()
