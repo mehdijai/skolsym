@@ -21,24 +21,21 @@ const filteredGroups = (t) => {
   );
 };
 
+const form = useForm({
+  id: null,
+  assign_to: null,
+});
+
 const deleteGroup = (t) => {
   removeGroup.value = t;
   form.id = t.id;
-  form.assign_to =
-    t.groups_count > 0 && filteredGroups(t).length > 0
-      ? String(filteredGroups(t)[0].id)
-      : null;
+  form.assign_to = 'null'
 };
 
 const cancelDeletion = () => {
   removeGroup.value = null;
   form.reset();
 };
-
-const form = useForm({
-  id: null,
-  assign_to: null,
-});
 
 const confirmDeletion = () => {
   form.post(route("groups.delete"), {
@@ -73,9 +70,12 @@ const confirmDeletion = () => {
           class="mt-1 block w-full"
         >
           <template #options>
+            <option :selected="form.assign_to == 'null'" :value="'null'">
+              None
+            </option>
             <template
-              v-for="(group, index) in filteredGroups(removeGroup)"
-              :key="'ts-' + index"
+              v-for="group in filteredGroups(removeGroup)"
+              :key="'ts-' + group.id"
             >
               <option :value="group.id">
                 {{ group.title }} ({{ group.students_count }})
