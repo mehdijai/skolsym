@@ -16,6 +16,12 @@ use Inertia\Inertia;
 
 class TeacherController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->model = Teacher::class;
+    }
+
     public function index()
     {
         $query = Teacher::query()->withCount('courses');
@@ -121,25 +127,6 @@ class TeacherController extends Controller
         $teacher->save();
 
         return redirect()->route('teachers.index');
-    }
-
-    public function archive($id)
-    {
-
-        $teacher = Teacher::find($id);
-
-        if ($teacher->archived == true) {
-
-            $teacher->archived = false;
-            $teacher->archived_at = null;
-        } else {
-            $teacher->archived = true;
-            $teacher->archived_at = new DateTime();
-        }
-
-        $teacher->save();
-
-        return redirect()->back();
     }
 
     public function delete(TeacherRequest $request)

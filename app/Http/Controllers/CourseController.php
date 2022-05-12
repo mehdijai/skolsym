@@ -15,6 +15,11 @@ use Inertia\Inertia;
 
 class CourseController extends Controller
 {
+    public function __construct()
+    {
+        $this->model = Course::class;
+    }
+
     public function index()
     {
         $query = Course::query()->with('teacher')->withCount('groups');
@@ -98,25 +103,6 @@ class CourseController extends Controller
         $course->save();
 
         return redirect()->route('courses.index');
-    }
-
-    public function archive($id)
-    {
-
-        $course = Course::find($id);
-
-        if ($course->archived == true) {
-
-            $course->archived = false;
-            $course->archived_at = null;
-        } else {
-            $course->archived = true;
-            $course->archived_at = new DateTime();
-        }
-
-        $course->save();
-
-        return redirect()->back();
     }
 
     public function delete(CourseRequest $request)

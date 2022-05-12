@@ -16,6 +16,11 @@ use Inertia\Inertia;
 
 class StudentController extends Controller
 {
+    public function __construct()
+    {
+        $this->model = Student::class;
+    }
+
     public function index()
     {
         $query = Student::query()
@@ -139,25 +144,6 @@ class StudentController extends Controller
         }
 
         return redirect()->route('students.index');
-    }
-
-    public function archive($id)
-    {
-
-        $student = Student::find($id);
-
-        if ($student->archived == true) {
-
-            $student->archived = false;
-            $student->archived_at = null;
-        } else {
-            $student->archived = true;
-            $student->archived_at = new DateTime();
-        }
-
-        $student->save();
-
-        return redirect()->back();
     }
 
     public function delete(StudentRequest $request)

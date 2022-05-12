@@ -12,12 +12,16 @@ use App\QueryFilter\Filters\GroupsFilter;
 use App\QueryFilter\Searches\GroupsSearch;
 use App\QueryFilter\Searches\StudentsSearch;
 use DateTime;
-use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Inertia\Inertia;
 
 class GroupController extends Controller
 {
+    public function __construct()
+    {
+        $this->model = Group::class;
+    }
+
     public function index()
     {
         $query = Group::query()->with('course')->withCount('students');
@@ -167,25 +171,6 @@ class GroupController extends Controller
         }
 
         return redirect()->route('groups.index');
-    }
-
-    public function archive($id)
-    {
-
-        $group = Group::find($id);
-
-        if ($group->archived == true) {
-
-            $group->archived = false;
-            $group->archived_at = null;
-        } else {
-            $group->archived = true;
-            $group->archived_at = new DateTime();
-        }
-
-        $group->save();
-
-        return redirect()->back();
     }
 
     public function delete(GroupRequest $request)
