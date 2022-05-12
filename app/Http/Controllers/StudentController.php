@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Http\Requests\StudentRequest;
 use App\Models\Course;
 use App\Models\Student;
 use App\QueryFilter\Filters\StudentsFilter;
 use App\QueryFilter\Searches\StudentsSearch;
-use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class StudentController extends Controller
@@ -20,16 +19,16 @@ class StudentController extends Controller
     public function index()
     {
         $query = Student::query()
-        ->with(['payments' => function($q){
-            $q->currentMonth()->latest();
-        }])
-        ->with('groups.course.payments');
+            ->with(['payments' => function ($q) {
+                $q->currentMonth()->latest();
+            }])
+            ->with('groups.course.payments');
 
         $students = app(Pipeline::class)
             ->send($query)
             ->through([
                 StudentsSearch::class,
-                StudentsFilter::class
+                StudentsFilter::class,
             ])
             ->thenReturn()
             ->latest()
@@ -61,20 +60,10 @@ class StudentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StudentRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:50|min:4',
-            'email' => 'required|email|unique:students,email',
-            'phone' => 'required|string',
-            'age' => 'sometimes|numeric',
-            'grade' => 'sometimes|string',
-            'groups' => 'array',
-        ]);
 
-        session()->flash($validator->errors());
-
-        $validated = $validator->validate();
+        $validated = $request->validated();
 
         $student = new Student();
         $student->name = $validated['name'];
@@ -112,22 +101,10 @@ class StudentController extends Controller
         ]);
     }
 
-    public function edit(Request $request)
+    public function edit(StudentRequest $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:students,id',
-            'name' => 'required|max:50|min:4',
-            'email' => ['required', 'email', 'unique:students,email,' . $request->id],
-            'phone' => 'required|string',
-            'age' => 'sometimes|numeric',
-            'grade' => 'sometimes|string',
-            'state' => ['sometimes', 'nullable', Rule::in(StateLists::STUDENT)],
-            'archived' => 'sometimes|boolean',
-            'groups' => 'array',
-        ]);
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         $student = Student::find($validated['id']);
 
@@ -183,19 +160,9 @@ class StudentController extends Controller
         return redirect()->back();
     }
 
-    public function delete(Request $request)
+    public function delete(StudentRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:students,id',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $validated = $validator->validate();
+        $validated = $request->validated();
 
         $student = Student::find($validated['id']);
 

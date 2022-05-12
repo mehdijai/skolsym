@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Teacher;
 use App\QueryFilter\Filters\CoursesFilter;
 use App\QueryFilter\Searches\CoursesSearch;
 use DateTime;
-use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class CourseController extends Controller
@@ -20,7 +18,7 @@ class CourseController extends Controller
     public function index()
     {
         $query = Course::query()->with('teacher')->withCount('groups');
-        
+
         $courses = app(Pipeline::class)
             ->send($query)
             ->through([
@@ -49,18 +47,9 @@ class CourseController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(CourseRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string',
-            'period' => 'required|numeric',
-            'price' => 'required|numeric',
-            'payment_type' => ['required', Rule::in(StateLists::PAYMENT_TYPE)],
-            'teacher_id' => 'required|numeric|exists:teachers,id',
-            'teacher_percentage' => 'required|numeric',
-        ]);
-
-        Course::create($validator->validated());
+        Course::create($request->validated());
 
         return redirect()->route('courses.index');
     }
@@ -75,22 +64,10 @@ class CourseController extends Controller
         ]);
     }
 
-    public function edit(Request $request)
+    public function edit(CourseRequest $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:courses,id',
-            'title' => 'required|string',
-            'period' => 'required|numeric',
-            'price' => 'required|numeric',
-            'payment_type' => ['required', Rule::in(StateLists::PAYMENT_TYPE)],
-            'teacher_id' => 'sometimes|required|numeric|exists:teachers,id',
-            'state' => ['sometimes', 'nullable', Rule::in(StateLists::COURSE)],
-            'archived' => 'sometimes|boolean',
-            'teacher_percentage' => 'required|numeric',
-        ]);
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         $course = Course::find($validated['id']);
 
@@ -142,31 +119,10 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function delete(Request $request)
+    public function delete(CourseRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:courses,id',
-            'assign_to' => function ($value, $attribute) {
-                if ($value == null) {
-                    return [
-                        'nullable',
-                    ];
-                } else {
-                    return [
-                        'numeric',
-                        Rule::exists(Course::class, 'id'),
-                    ];
-                }
-            },
-        ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $validated = $validator->validate();
+        $validated = $request->validated();
 
         $this->remove($validated['id'], $validated['assign_to'], false);
 

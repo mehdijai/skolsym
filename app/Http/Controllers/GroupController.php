@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Http\Requests\GroupRequest;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupStudent;
@@ -13,8 +14,6 @@ use App\QueryFilter\Searches\StudentsSearch;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class GroupController extends Controller
@@ -27,7 +26,7 @@ class GroupController extends Controller
             ->send($query)
             ->through([
                 GroupsSearch::class,
-                GroupsFilter::class
+                GroupsFilter::class,
             ])
             ->thenReturn()
             ->latest()
@@ -99,15 +98,10 @@ class GroupController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(GroupRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'course_id' => 'required|numeric|exists:courses,id',
-            'title' => 'required|string',
-            'students' => 'array',
-        ]);
 
-        $validated = $validator->validate();
+        $validated = $request->validated();
 
         $course = Course::select('title')->findOrFail($validated['course_id']);
         $title = explode(' ', $course->title);
@@ -139,22 +133,13 @@ class GroupController extends Controller
         ]);
     }
 
-    public function edit(Request $request)
+    public function edit(GroupRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:groups,id',
-            'title' => 'required|string',
-            'course_id' => 'sometimes|required|numeric|exists:courses,id',
-            'state' => ['sometimes', 'nullable', Rule::in(StateLists::GROUP)],
-            'archived' => 'sometimes|boolean',
-            'students' => 'array',
-        ]);
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         $group = Group::find($validated['id']);
 
-        $group->title = $validated["title"];
+        $group->title = strtoupper($validated["title"]);
         $group->course_id = $validated["course_id"];
 
         if (array_key_exists('state', $validated)) {
@@ -203,36 +188,17 @@ class GroupController extends Controller
         return redirect()->back();
     }
 
-    public function delete(Request $request)
+    public function delete(GroupRequest $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:groups,id',
-            'assign_to' => function ($value, $attribute) {
-                if ($value == null) {
-                    return [
-                        'nullable',
-                    ];
-                } else {
-                    return [
-                        'numeric',
-                        Rule::exists(Group::class, 'id'),
-                    ];
-                }
-            },
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $validated = $validator->validate();
-
-        if ($validated['assign_to'] != null) {
-            GroupStudent::where('group_id', $validated['did'])
-                ->update(['group_id' => $validated['id']]);
+        if ($validated['assign_to'] != 'null') {
+            GroupStudent::where('group_id', $validated['id'])
+                ->update(['group_id' => $validated['assign_to']]);
+        } else {
+            GroupStudent::where('group_id', $validated['id'])
+                ->delete();
         }
 
         $group = Group::find($validated['id']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Http\Requests\TeacherRequest;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
@@ -10,10 +11,7 @@ use App\Models\Teacher;
 use App\QueryFilter\Filters\TeachersFilter;
 use App\QueryFilter\Searches\TeachersSearch;
 use DateTime;
-use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class TeacherController extends Controller
@@ -26,7 +24,7 @@ class TeacherController extends Controller
             ->send($query)
             ->through([
                 TeachersSearch::class,
-                TeachersFilter::class
+                TeachersFilter::class,
             ])
             ->thenReturn()
             ->latest()
@@ -81,18 +79,9 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(TeacherRequest $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|max:50|min:4',
-            'email' => 'required|email|unique:teachers',
-            'phone' => 'required|string',
-            'state' => ['required', Rule::in(StateLists::TEACHER)],
-        ]);
-
-        Teacher::create($validator->validated());
-
+        Teacher::create($request->validated());
         return redirect()->route('teachers.index');
     }
 
@@ -104,19 +93,10 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function edit(Request $request)
+    public function edit(TeacherRequest $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:teachers,id',
-            'name' => 'required|max:50|min:4',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'state' => ['required', Rule::in(StateLists::TEACHER)],
-            'archived' => 'required|boolean',
-        ]);
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         $teacher = Teacher::find($validated['id']);
 
@@ -162,31 +142,10 @@ class TeacherController extends Controller
         return redirect()->back();
     }
 
-    public function delete(Request $request)
+    public function delete(TeacherRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|numeric|exists:teachers,id',
-            'assign_to' => function ($value, $attribute) {
-                if ($value == null) {
-                    return [
-                        'nullable',
-                    ];
-                } else {
-                    return [
-                        'numeric',
-                        Rule::exists(Teacher::class, 'id'),
-                    ];
-                }
-            },
-        ]);
 
-        if ($validator->fails()) {
-            return redirect()->route('teachers.index')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         $teacher = Teacher::find($validated['id']);
 

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Const\StateLists;
+use App\Http\Requests\PaymentRequest;
 use App\Models\Payment;
 use App\QueryFilter\Filters\PaymentsFilter;
 use App\QueryFilter\Searches\PaymentsSearch;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -22,7 +22,7 @@ class PaymentController extends Controller
             ->send($query)
             ->through([
                 PaymentsSearch::class,
-                PaymentsFilter::class
+                PaymentsFilter::class,
             ])
             ->thenReturn()
             ->latest()
@@ -39,14 +39,10 @@ class PaymentController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(PaymentRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|numeric|exists:students,id',
-            'courses' => 'required|array',
-        ]);
 
-        $validated = $validator->validated();
+        $validated = $request->validated();
 
         foreach ($validated['courses'] as $course) {
             Payment::create([
@@ -77,12 +73,13 @@ class PaymentController extends Controller
 
     }
 
-    public function pay(Request $request)
+    public function pay(PaymentRequest $request)
     {
-        $payment = Payment::findOrFail($request->id);
+        $validated = $request->validated();
+        $payment = Payment::findOrFail($validated['id']);
         $payment->state = "paid";
-        $payment->amount_payed = $request->price;
-        $payment->teacher_part = $request->price * $request->teacher_percentage;
+        $payment->amount_payed = $validated['price'];
+        $payment->teacher_part = $validated['price'] * $validated['teacher_percentage'];
         $payment->paid_at = now();
         $payment->save();
 
