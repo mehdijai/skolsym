@@ -563,6 +563,7 @@ onMounted(() => {
                       >
                         <li
                           v-if="
+                            group != null &&
                             student.payments.length > 0 &&
                             student.payments[0].state != 'paid'
                           "
