@@ -162,8 +162,10 @@ const submit = () => {
               id="archive"
               v-model="form.archived"
               :checked="form.archived"
-              label="Archived"
             />
+            <label for="archive" class="label-text ml-2 font-bold"
+                >Archived</label
+              >
           </div>
 
           <div class="flex items-center justify-end mt-4">
