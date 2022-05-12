@@ -6,6 +6,7 @@ use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Teacher;
+use App\QueryFilter\Filters\CoursesFilter;
 use App\QueryFilter\Searches\CoursesSearch;
 use DateTime;
 use Illuminate\Http\Request;
@@ -19,19 +20,12 @@ class CourseController extends Controller
     public function index()
     {
         $query = Course::query()->with('teacher')->withCount('groups');
-
-        if (in_array(request('filter'), StateLists::COURSE)) {
-            $query->where('state', request('filter'));
-        }
-
-        if (request('filter') == 'archived') {
-            $query->where('archived', true);
-        }
-
+        
         $courses = app(Pipeline::class)
             ->send($query)
             ->through([
                 CoursesSearch::class,
+                CoursesFilter::class,
             ])
             ->thenReturn()
             ->latest()

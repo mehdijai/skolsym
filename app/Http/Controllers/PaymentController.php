@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Const\StateLists;
 use App\Models\Payment;
+use App\QueryFilter\Filters\PaymentsFilter;
 use App\QueryFilter\Searches\PaymentsSearch;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
@@ -17,18 +18,11 @@ class PaymentController extends Controller
 
         $query = Payment::query()->with('course.teacher', 'student');
 
-        if (in_array(request('filter'), StateLists::PAYMENT)) {
-            $query->where('state', request('filter'));
-        }
-
-        if (request('filter') == 'archived') {
-            $query->where('archived', true);
-        }
-
         $payments = app(Pipeline::class)
             ->send($query)
             ->through([
                 PaymentsSearch::class,
+                PaymentsFilter::class
             ])
             ->thenReturn()
             ->latest()

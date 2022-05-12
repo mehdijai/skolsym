@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\QueryFilter\Filters\TeachersFilter;
 use App\QueryFilter\Searches\TeachersSearch;
 use DateTime;
 use Illuminate\Http\Request;
@@ -21,21 +22,11 @@ class TeacherController extends Controller
     {
         $query = Teacher::query()->withCount('courses');
 
-        switch (request('filter')) {
-            case StateLists::TEACHER['ACTIVE']:
-                $query->where('state', 'active')->where('archived', false);
-                break;
-            case StateLists::TEACHER['REMOVED']:
-                $query->where('state', 'removed')->where('archived', false);
-                break;
-            case 'archived':$query->where('archived', true);
-                break;
-        }
-
         $teachers = app(Pipeline::class)
             ->send($query)
             ->through([
                 TeachersSearch::class,
+                TeachersFilter::class
             ])
             ->thenReturn()
             ->latest()

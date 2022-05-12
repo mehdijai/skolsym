@@ -37,6 +37,7 @@ function formatDate(date) {
           <th scope="col">Teacher</th>
           <th scope="col">Paid $</th>
           <th scope="col">Teacher $</th>
+          <th scope="col">Created at</th>
           <th scope="col">Paid at</th>
           <th scope="col">Payment Type</th>
           <th scope="col">State</th>
@@ -113,6 +114,13 @@ function formatDate(date) {
                     {{
                       payment.course.teacher_percentage * payment.amount_payed
                     }}
+                  </p>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <p>
+                    {{ formatDate(new Date(payment.created_at)) }}
                   </p>
                 </div>
               </td>

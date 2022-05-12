@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupStudent;
 use App\Models\Student;
+use App\QueryFilter\Filters\GroupsFilter;
 use App\QueryFilter\Searches\GroupsSearch;
 use App\QueryFilter\Searches\StudentsSearch;
 use DateTime;
@@ -22,18 +23,11 @@ class GroupController extends Controller
     {
         $query = Group::query()->with('course')->withCount('students');
 
-        if (in_array(request('filter'), StateLists::GROUP)) {
-            $query->where('state', request('filter'));
-        }
-
-        if (request('filter') == 'archived') {
-            $query->where('archived', true);
-        }
-
         $groups = app(Pipeline::class)
             ->send($query)
             ->through([
                 GroupsSearch::class,
+                GroupsFilter::class
             ])
             ->thenReturn()
             ->latest()

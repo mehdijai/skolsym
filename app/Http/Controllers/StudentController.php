@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Student;
+use App\QueryFilter\Filters\StudentsFilter;
 use App\QueryFilter\Searches\StudentsSearch;
 use Carbon\Carbon;
 use DateTime;
@@ -24,18 +25,11 @@ class StudentController extends Controller
         }])
         ->with('groups.course.payments');
 
-        if (in_array(request('filter'), StateLists::STUDENT)) {
-            $query->where('state', request('filter'))->orWhereRelation('payments', 'state', request('filter'));
-        }
-
-        if (request('filter') == 'archived') {
-            $query->where('archived', true);
-        }
-
         $students = app(Pipeline::class)
             ->send($query)
             ->through([
                 StudentsSearch::class,
+                StudentsFilter::class
             ])
             ->thenReturn()
             ->latest()
@@ -43,7 +37,7 @@ class StudentController extends Controller
 
         return Inertia::render('Student/Show', [
             'students' => $students,
-            'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT)),
+            'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT), array_values(StateLists::PAYMENT)),
         ]);
     }
 
