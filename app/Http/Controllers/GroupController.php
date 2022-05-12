@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\GroupStudent;
 use App\Models\Student;
 use App\QueryFilter\Searches\GroupsSearch;
+use App\QueryFilter\Searches\StudentsSearch;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
@@ -45,27 +46,13 @@ class GroupController extends Controller
             'states' => array_merge(['', 'archived'], array_values(StateLists::GROUP)),
         ]);
     }
-    
+
     public function view($id)
     {
         $query = Group::query()
             ->with([
                 'students' => function ($query) {
                     $query->withCount('groups');
-                    if (request('search')) {
-
-                        $query->where(function ($query) {
-                            $query->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
-                                ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                                ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
-                                ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
-                                ->orWhere('name', 'LIKE', '%' . request('search') . '%')
-                                ->orWhere('email', 'LIKE', '%' . request('search') . '%')
-                                ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
-                                ->orWhere('age', 'LIKE', '%' . request('search') . '%')
-                                ->orWhere('grade', 'LIKE', '%' . request('search') . '%');
-                        });
-                    }
 
                     if (request('payment')) {
                         $query->where(function ($query) {
@@ -81,6 +68,15 @@ class GroupController extends Controller
                     if (request('filter') == 'archived') {
                         $query->where('archived', true);
                     }
+
+                    app(Pipeline::class)
+                        ->send($query)
+                        ->through([
+                            StudentsSearch::class,
+                        ])
+                        ->thenReturn()
+                        ->latest()
+                        ->get();
                 },
                 'students.payments' => fn($q) => $q->currentMonth()->latest(),
             ])
