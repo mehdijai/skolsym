@@ -6,8 +6,10 @@ use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Teacher;
+use App\QueryFilter\Searches\CoursesSearch;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -16,8 +18,6 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $allowed = ['teacher'];
-
         $query = Course::query()->with('teacher')->withCount('groups');
 
         if (in_array(request('filter'), StateLists::COURSE)) {
@@ -28,27 +28,18 @@ class CourseController extends Controller
             $query->where('archived', true);
         }
 
-        if (request('search')) {
-            if (strpos(request('search'), ':') !== false) {
-                $filter = explode(":", request('search'));
-                if (in_array($filter[0], $allowed)) {
-                    $query->whereRelation($filter[0], 'id', '=', $filter[1]);
-                }else if($filter[0] === 'course'){
-                    $query->where('id', $filter[1]);
-                }
-            } else {
-                $query->where(function ($query) {
-                    $query->whereRelation('teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('title', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('period', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('price', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('payment_type', 'LIKE', '%' . request('search') . '%');
-                });
-            }
-        }
+        $courses = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                CoursesSearch::class,
+            ])
+            ->thenReturn()
+            ->latest()
+            ->get()
+            ->append('month_revenue');
 
         return Inertia::render('Course/Show', [
-            'courses' => $query->get()->append('month_revenue'),
+            'courses' => $courses,
             'states' => array_merge(['', 'archived'], array_values(StateLists::COURSE)),
         ]);
     }

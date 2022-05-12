@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Student;
+use App\QueryFilter\Searches\StudentsSearch;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -16,36 +18,11 @@ class StudentController extends Controller
 {
     public function index()
     {
-        $allowed = ['groups', 'groups.course', 'groups.course.teacher'];
-
         $query = Student::query()
         ->with(['payments' => function($q){
             $q->currentMonth()->latest();
         }])
         ->with('groups.course.payments');
-
-        if (request('search')) {
-            if (strpos(request('search'), ':') !== false) {
-                $filter = explode(":", request('search'));
-                if (in_array($filter[0], $allowed)) {
-                    $query->whereRelation($filter[0], $filter[0] == 'groups' ? 'group_id' : 'id', $filter[1]);
-                } else if ($filter[0] === 'student') {
-                    $query->where('id', $filter[1]);
-                }
-            } else {
-                $query->where(function ($query) {
-                    $query->whereRelation('groups', 'title', 'LIKE', '%' . request('search') . '%')
-                        ->orWhereRelation('groups.course', 'title', 'LIKE', '%' . request('search') . '%')
-                        ->orWhereRelation('groups.course.teacher', 'name', 'LIKE', '%' . request('search') . '%')
-                        ->orWhereRelation('payments', 'state', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('name', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('email', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('phone', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('age', 'LIKE', '%' . request('search') . '%')
-                        ->orWhere('grade', 'LIKE', '%' . request('search') . '%');
-                });
-            }
-        }
 
         if (in_array(request('filter'), StateLists::STUDENT)) {
             $query->where('state', request('filter'))->orWhereRelation('payments', 'state', request('filter'));
@@ -55,10 +32,17 @@ class StudentController extends Controller
             $query->where('archived', true);
         }
 
-        
+        $students = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                StudentsSearch::class,
+            ])
+            ->thenReturn()
+            ->latest()
+            ->get();
 
         return Inertia::render('Student/Show', [
-            'students' => $query->get(),
+            'students' => $students,
             'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT)),
         ]);
     }

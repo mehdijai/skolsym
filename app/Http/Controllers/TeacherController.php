@@ -7,8 +7,10 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\QueryFilter\Searches\TeachersSearch;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -30,16 +32,18 @@ class TeacherController extends Controller
                 break;
         }
 
-        if (request('search')) {
-            $query->where(function ($query) {
-                $query->where('name', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('email', 'LIKE', '%' . request('search') . '%')
-                    ->orWhere('phone', 'LIKE', '%' . request('search') . '%');
-            });
-        }
+        $teachers = app(Pipeline::class)
+            ->send($query)
+            ->through([
+                TeachersSearch::class,
+            ])
+            ->thenReturn()
+            ->latest()
+            ->get()
+            ->append('month_revenue');
 
         return Inertia::render('Teacher/Show', [
-            'teachers' => $query->get()->append('month_revenue'),
+            'teachers' => $teachers,
             'states' => array_merge(['', 'archived'], array_values(StateLists::TEACHER)),
         ]);
     }
