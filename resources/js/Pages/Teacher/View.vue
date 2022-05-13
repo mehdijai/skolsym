@@ -12,6 +12,7 @@ import JetInputError from "@/Jetstream/InputError.vue";
 import CourseTable from "@/DataComponents/CourseTable.vue";
 import GroupTable from "@/DataComponents/GroupTable.vue";
 import StudentTable from "@/DataComponents/StudentTable.vue";
+import TagPill from "@/Jetstream/TagPill.vue";
 import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
 
@@ -118,6 +119,30 @@ const tab = computed(() => {
           <h2 class="text-2xl break-all font-bold text-gray-600 capitalize">
             {{ teacher.name }}
           </h2>
+          <div class="mt-2">
+            <Link
+              :href="
+                route('teachers.index', {
+                  filter:
+                    teacher.state === 'removed'
+                      ? teacher.state
+                      : teacher.archived
+                      ? 'archived'
+                      : teacher.state,
+                })
+              "
+            >
+              <TagPill
+                :value="
+                  teacher.state === 'removed'
+                    ? teacher.state
+                    : teacher.archived
+                    ? 'archived'
+                    : teacher.state
+                "
+              />
+            </Link>
+          </div>
           <a class="link mt-3 break-all" :href="'mailto:' + teacher.email">
             {{ teacher.email }}
           </a>
