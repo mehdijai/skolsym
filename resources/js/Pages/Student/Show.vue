@@ -30,7 +30,7 @@ const props = defineProps({
         <StudentTable :students="students">
           <template #header>
             <div
-              class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full"
+              class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 items-center justify-end w-full"
             >
               <Link
                 class="
