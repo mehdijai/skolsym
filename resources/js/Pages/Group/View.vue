@@ -21,7 +21,34 @@ const props = defineProps({
         <template #items>
           <li><Link :href="route('dashboard')">Dashboard</Link></li>
           <li><Link :href="route('groups.index')">Groups</Link></li>
-          <li>{{group.title}}</li>
+          <li class="flex items-center">
+            <span>
+              {{ group.title }}
+            </span>
+            <Link
+              class="ml-2"
+              :href="
+                route('groups.index', {
+                  filter:
+                    group.state === 'removed'
+                      ? group.state
+                      : group.archived
+                      ? 'archived'
+                      : group.state,
+                })
+              "
+            >
+              <TagPill
+                :value="
+                  group.state === 'removed'
+                    ? group.state
+                    : group.archived
+                    ? 'archived'
+                    : group.state
+                "
+              />
+            </Link>
+          </li>
         </template>
       </Breadcrumbs>
     </template>
@@ -31,7 +58,17 @@ const props = defineProps({
         <StudentTable :group="group" :students="group.students">
           <template #header>
             <div
-              class="py-8 flex gap-x-4 flex-row mb-1 sm:mb-0 justify-end w-full"
+              class="
+                py-8
+                flex
+                gap-x-4
+                flex-row
+                mb-1
+                sm:mb-0
+                items-center
+                justify-end
+                w-full
+              "
             >
               <Link
                 class="
@@ -42,7 +79,7 @@ const props = defineProps({
                   leading-tight
                   mr-auto
                 "
-                :href="route('students.create', {group: group.id})"
+                :href="route('students.create', { group: group.id })"
                 >Create new student</Link
               >
               <FilterSystem :states="states" />
