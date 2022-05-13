@@ -109,33 +109,24 @@ class CourseController extends Controller
     {
 
         $validated = $request->validated();
+        $course = Course::find($validated['id']);
 
-        $this->remove($validated['id'], $validated['assign_to'], false);
+        $this->remove($course, $validated['assign_to']);
 
         return redirect()->back();
     }
 
-    public function remove($id, $assign_groups_to = null, $hold = false)
+    public function remove($course, $assign_to)
     {
-        $groups = Group::where('course_id', $id)->get();
-
-        foreach ($groups as $group) {
-
-            $group->state = $hold ? StateLists::GROUP['HOLD'] : StateLists::GROUP['REMOVED'];
-            $group->archived = true;
-            $group->archived_at = new DateTime();
-
-            if ($assign_groups_to != null) {
-                $group->course_id = $assign_groups_to;
-            }
-
-            $group->save();
+        if ($assign_to == 'null' || $assign_to == null) {
+            $course->groups()->get()->map(function (Group $group) use($assign_to) {
+                $groupController = new GroupController();
+                $groupController->remove($group->id, $assign_to);
+            });
+        } else {
+            $course->groups()->update(['course_id' => $assign_to]);
         }
 
-        Course::query()->where('id', $id)->update([
-            'state' => $hold ? StateLists::COURSE['HOLD'] : StateLists::COURSE['REMOVED'],
-            'archived' => true,
-            'archived_at' => new DateTime(),
-        ]);
+        $course->remove();
     }
 }

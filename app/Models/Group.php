@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Const\RemoveModelTrait;
 use App\Models\Course;
 use App\Models\GroupStudent;
 use App\Models\Student;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Group extends Model
 {
-    use HasFactory;
+    use HasFactory, RemoveModelTrait;
 
     protected $table = 'groups';
     protected $fillable = [

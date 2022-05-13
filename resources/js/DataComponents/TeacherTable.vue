@@ -16,21 +16,21 @@ const props = defineProps({
 
 const removeTeacher = ref(null);
 
+const form = useForm({
+  id: null,
+  assign_to: null,
+});
+
 const deleteTeacher = (t) => {
   removeTeacher.value = t;
   form.id = t.id;
-  form.assign_to = null;
+  form.assign_to = 'null';
 };
 
 const cancelDeletion = () => {
   removeTeacher.value = null;
   form.reset();
 };
-
-const form = useForm({
-  id: null,
-  assign_to: null,
-});
 
 const confirmDeletion = () => {
   form.post(route("teachers.delete"), {
@@ -59,8 +59,11 @@ const confirmDeletion = () => {
           class="mt-1 block w-full"
         >
           <template #options>
+            <option :selected="form.assign_to == 'null'" value="null">
+              None
+            </option>
             <template
-              v-for="(teacher, index) in teacher.filter(
+              v-for="(teacher, index) in teachers.filter(
                 (t) => t.id !== form.id
               )"
               :key="'ts-' + index"

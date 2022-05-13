@@ -178,22 +178,21 @@ class GroupController extends Controller
 
         $validated = $request->validated();
 
-        if ($validated['assign_to'] != 'null') {
-            GroupStudent::where('group_id', $validated['id'])
-                ->update(['group_id' => $validated['assign_to']]);
-        } else {
-            GroupStudent::where('group_id', $validated['id'])
-                ->delete();
-        }
-
-        $group = Group::find($validated['id']);
-
-        $group->state = StateLists::GROUP['REMOVED'];
-        $group->archived = true;
-        $group->archived_at = new DateTime();
-
-        $group->save();
+        $this->remove($validated['id'], $validated['assign_to']);
 
         return redirect()->back();
+    }
+
+    public function remove($id, $assign_to)
+    {
+        if ($assign_to == 'null' || $assign_to == null) {
+            GroupStudent::where('group_id', $id)
+                ->delete();
+        } else {
+            GroupStudent::where('group_id', $id)
+                ->update(['group_id' => $assign_to]);
+        }
+
+        Group::find($id)->remove();
     }
 }

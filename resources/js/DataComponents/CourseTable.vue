@@ -19,6 +19,11 @@ const props = defineProps({
 
 const removeCourse = ref(null);
 
+const form = useForm({
+  id: null,
+  assign_to: null,
+});
+
 const filteredCourses = (t) => {
   return props.courses.filter(
     (c) => c.id !== t.id && c.state == "active" && !t.archived
@@ -28,21 +33,13 @@ const filteredCourses = (t) => {
 const deleteCourse = (t) => {
   removeCourse.value = t;
   form.id = t.id;
-  form.assign_to =
-    t.groups_count > 0 && filteredCourses(t).length > 0
-      ? String(filteredCourses(t)[0].id)
-      : null;
+  form.assign_to = "null";
 };
 
 const cancelDeletion = () => {
   removeCourse.value = null;
   form.reset();
 };
-
-const form = useForm({
-  id: null,
-  assign_to: null,
-});
 
 const confirmDeletion = () => {
   form.post(route("courses.delete"), {
@@ -77,6 +74,9 @@ const confirmDeletion = () => {
           class="mt-1 block w-full"
         >
           <template #options>
+            <option :selected="form.assign_to == 'null'" value="null">
+              None
+            </option>
             <template
               v-for="(course, index) in filteredCourses(removeCourse)"
               :key="'ts-' + index"
@@ -222,9 +222,7 @@ const confirmDeletion = () => {
                 <span class="font-semibold text-green-700">
                   {{ course.month_revenue }} DH
                 </span>
-                <span class="font-regular mx-1">
-                  /
-                </span>
+                <span class="font-regular mx-1"> / </span>
                 <span class="font-semibold text-orange-700">
                   {{ course.month_revenue * course.teacher_percentage }} DH
                 </span>

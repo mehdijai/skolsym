@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Const\RemoveModelTrait;
 use App\Models\Group;
 use App\Models\GroupStudent;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, RemoveModelTrait;
 
     protected $table = "students";
 

@@ -134,23 +134,24 @@ class TeacherController extends Controller
 
         $validated = $request->validated();
 
-        $teacher = Teacher::find($validated['id']);
-
-        $teacher->state = StateLists::TEACHER['REMOVED'];
-        $teacher->archived = true;
-        $teacher->archived_at = new DateTime();
-
-        if (array_key_exists('assign_to', $validated) && $validated['assign_to'] != null) {
-            Course::where('teacher_id', $request['id'])->update(['teacher_id' => $validated['assign_to']]);
-        } else {
-            $cc = new CourseController();
-            foreach ($teacher->courses as $course) {
-                $cc->remove($course->id, null, true);
-            }
-        }
-
-        $teacher->save();
+        $this->remove($validated['id'], $validated['assign_to']);
 
         return redirect()->route('teachers.index');
+    }
+
+    public function remove($id, $assign_to)
+    {
+        $teacher = Teacher::find($id);
+
+        if ($assign_to == null || $assign_to == 'null') {
+            $cc = new CourseController();
+            foreach ($teacher->courses as $course) {
+                $cc->remove($course, null);
+            }
+        } else {
+            Course::where('teacher_id', $id)->update(['teacher_id' => $assign_to]);
+        }
+
+        $teacher->remove();
     }
 }

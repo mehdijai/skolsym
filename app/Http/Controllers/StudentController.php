@@ -150,56 +150,13 @@ class StudentController extends Controller
     {
         $validated = $request->validated();
 
-        $student = Student::find($validated['id']);
-
-        $student->state = "removed";
-        $student->archived = true;
-        $student->archived_at = new DateTime();
-
-        $student->save();
+        $this->remove($validated['id']);
 
         return redirect()->back();
     }
 
-    public function assign_to_group(Request $request)
+    public function remove($id)
     {
-
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|numeric|exists:students,id',
-            'group_id' => 'required|numeric|exists:groups,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
-
-        $validated = $validator->validated();
-
-        $student = Student::find($validated["student_id"]);
-
-        $student->groups()->attach($validated['group_id']);
-
-        return response()->json($student, 200);
-    }
-
-    public function detach_from_group(Request $request)
-    {
-
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|numeric|exists:students,id',
-            'group_id' => 'required|numeric|exists:groups,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 401);
-        }
-
-        $validated = $validator->validated();
-
-        $student = Student::find($validated["student_id"]);
-
-        $student->groups()->detach($validated['group_id']);
-
-        return response()->json($student, 200);
+        Student::find($id)->remove();
     }
 }
