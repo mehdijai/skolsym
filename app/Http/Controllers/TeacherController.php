@@ -49,7 +49,6 @@ class TeacherController extends Controller
             'courses' => function ($query) {
                 $query->with('teacher');
                 $query->withCount('groups');
-                $query->selectSub('100', 'revenue');
             },
         ])->find($id);
 
