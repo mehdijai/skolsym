@@ -84,6 +84,7 @@ Route::middleware([
         Route::post('/edit', [StudentController::class, 'edit'])->name('edit');
         Route::get('/archive/{id}', [StudentController::class, 'archive'])->name('archive');
         Route::post('/delete', [StudentController::class, 'delete'])->name("delete");
+        Route::get('/{id}', [StudentController::class, 'view'])->name("view");
     });
 
     // Payment Routes

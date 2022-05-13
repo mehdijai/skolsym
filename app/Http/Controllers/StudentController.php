@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Const\StateLists;
 use App\Http\Requests\StudentRequest;
 use App\Models\Course;
+use App\Models\Group;
 use App\Models\Student;
 use App\QueryFilter\Filters\StudentsFilter;
 use App\QueryFilter\Searches\StudentsSearch;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class StudentController extends Controller
@@ -42,6 +42,34 @@ class StudentController extends Controller
         return Inertia::render('Student/Show', [
             'students' => $students,
             'states' => array_merge(['', 'archived'], array_values(StateLists::STUDENT), array_values(StateLists::PAYMENT)),
+        ]);
+    }
+
+    public function view($id)
+    {
+        $student = Student::with([
+            'payments' => function ($query) {
+                $query->with('course.teacher', 'student')
+                    ->latest();
+            },
+            'groups' => function ($query) {
+                $query->withCount('students')
+                    ->with('course');
+            },
+        ])
+            ->find($id)
+            ->append('month_paid');
+
+        $student->groups()->get()->map(function (Group $group) {
+            $group->append('month_revenue');
+        });
+
+        if (empty($student)) {
+            abort(404, "This student doesn't exist in our records");
+        }
+
+        return Inertia::render('Student/View', [
+            'student' => $student,
         ]);
     }
 

@@ -297,12 +297,13 @@ onMounted(() => {
             >
               <td>
                 <div class="flex items-center">
-                  <p
+                  <Link
+                    :href="route('students.view', [student.id])"
                     v-if="group == null"
                     class="font-bold text-gray-900 whitespace-no-wrap"
                   >
                     {{ student.name }}
-                  </p>
+                  </Link>
                   <Link
                     v-else
                     :href="
