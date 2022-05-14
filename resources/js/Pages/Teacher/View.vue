@@ -268,11 +268,6 @@ function diffPercentage(prev, current) {
               >
                 {{ students.length }}
               </p>
-              <div class="flex items-center text-green-500 text-sm">
-                <span class="material-icons text-green-600">arrow_drop_up</span>
-                <span> 5.5% </span>
-                <span class="text-gray-400"> vs last month </span>
-              </div>
             </div>
           </div>
         </div>
