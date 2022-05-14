@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('group_student', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->references('id')->on('students');
-            $table->foreignId('group_id')->references('id')->on('groups');
+            $table->foreignId('student_id')->references('id')->on('students')->onDelete('cascade');
+            $table->foreignId('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->string('certificate')->nullable();
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();
