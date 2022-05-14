@@ -6,7 +6,6 @@ use App\Const\RemoveModelTrait;
 use App\Models\Course;
 use App\Models\GroupStudent;
 use App\Models\Student;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,29 +24,40 @@ class Group extends Model
         'archived_at',
     ];
 
-    protected $appends = ['month_revenue'];
+    protected $appends = ['month_revenue', 'last_month_revenue'];
 
-    protected function MonthRevenue(): Attribute
+    protected function getMonthRevenueAttribute()
     {
-        return new Attribute(
-            get:function () {
-                $students = $this->students()
-                    ->get()
-                    ->append('month_paid')
-                    ->toArray();
+        return $this->getAmountRevenue();
+    }
 
-                $paidByStudents = array_map(function ($p) {
-                    return $p['month_paid'];
-                }, $students);
+    protected function getLastMonthRevenueAttribute()
+    {
+        return $this->getAmountRevenue(true);
+    }
 
-                $paidByGroup = array_reduce($paidByStudents, function ($c, $i) {
-                    $c += $i;
-                    return $c;
-                });
+    protected function getAmountRevenue($previous = false)
+    {
+        $students = $this->students()->get();
 
-                return $paidByGroup;
-            },
-        );
+        if ($previous) {
+            $students = $students->append('month_paid')->toArray();
+        } else {
+            $students = $students->append('last_month_paid')->toArray();
+        }
+
+        $paidByStudents = array_map(function ($p) use ($previous) {
+            if ($previous) {
+                return $p['last_month_paid'];
+            } else {
+                return $p['month_paid'];
+            }
+        }, $students);
+
+        return array_reduce($paidByStudents, function ($c, $i) {
+            $c += $i;
+            return $c;
+        });
     }
 
     public function course(): BelongsTo

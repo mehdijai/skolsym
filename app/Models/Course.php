@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Const\RemoveModelTrait;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,29 +25,40 @@ class Course extends Model
         'archived_at',
     ];
 
-    protected $appends = ['month_revenue'];
+    protected $appends = ['month_revenue', 'last_month_revenue'];
 
-    protected function MonthRevenue(): Attribute
+    protected function getMonthRevenueAttribute()
     {
-        return new Attribute(
-            get:function () {
-                $groups = $this->groups()
-                    ->get()
-                    ->append('month_revenue')
-                    ->toArray();
+        return $this->getAmountRevenue();
+    }
 
-                $paidByGroups = array_map(function ($p) {
-                    return $p['month_revenue'];
-                }, $groups);
+    protected function getLastMonthRevenueAttribute()
+    {
+        return $this->getAmountRevenue(true);
+    }
 
-                $paidByCourse = array_reduce($paidByGroups, function ($c, $i) {
-                    $c += $i;
-                    return $c;
-                });
+    protected function getAmountRevenue($previous = false)
+    {
+        $groups = $this->groups()->get();
 
-                return $paidByCourse;
-            },
-        );
+        if ($previous) {
+            $groups = $groups->append('month_revenue')->toArray();
+        } else {
+            $groups = $groups->append('last_month_revenue')->toArray();
+        }
+
+        $paidByGroups = array_map(function ($p) use ($previous) {
+            if ($previous) {
+                return $p['last_month_revenue'];
+            } else {
+                return $p['month_revenue'];
+            }
+        }, $groups);
+
+        return array_reduce($paidByGroups, function ($c, $i) {
+            $c += $i;
+            return $c;
+        });
     }
 
     public function groups(): HasMany

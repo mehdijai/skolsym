@@ -50,6 +50,13 @@ const tab = computed(() => {
     ? window.location.hash.replace("#", "")
     : "courses";
 });
+
+function diffPercentage(prev, current) {
+  if (prev == 0) {
+    return 100;
+  }
+  return Math.floor(((current - prev) / prev) * 100);
+}
 </script>
 
 <template>
@@ -192,10 +199,32 @@ const tab = computed(() => {
                 {{ teacher.month_revenue }}
                 <span class="text-sm"> DH </span>
               </p>
-              <div class="flex items-center text-green-500 text-sm">
-                <span class="material-icons text-green-600">arrow_drop_up</span>
-                <span> 5.5% </span>
-                <span class="text-gray-400"> vs last month </span>
+              <div
+                class="flex items-center text-sm"
+                :class="
+                  diffPercentage(teacher.last_month_revenue, teacher.month_revenue) >=
+                  0
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                "
+              >
+                <span class="material-icons">{{
+                  diffPercentage(teacher.last_month_revenue, teacher.month_revenue) >=
+                  0
+                    ? "arrow_drop_up"
+                    : "arrow_drop_down"
+                }}</span>
+                <span>
+                  {{
+                    Math.abs(
+                      diffPercentage(
+                        teacher.last_month_revenue,
+                        teacher.month_revenue
+                      )
+                    )
+                  }}%
+                </span>
+                <span class="ml-1 text-gray-400">vs last month </span>
               </div>
             </div>
           </div>

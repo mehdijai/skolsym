@@ -24,10 +24,14 @@ class StudentController extends Controller
     public function index()
     {
         $query = Student::query()
-            ->with(['payments' => function ($q) {
-                $q->currentMonth()->latest();
-            }])
-            ->with('groups.course.payments');
+            ->with([
+                'payments' => function ($q) {
+                    $q->currentMonth()->latest();
+                },
+                'groups.course.payments' => function ($q) {
+                    $q->currentMonth()->latest();
+                }
+            ]);
 
         $students = app(Pipeline::class)
             ->send($query)
@@ -57,8 +61,7 @@ class StudentController extends Controller
                     ->with('course');
             },
         ])
-            ->find($id)
-            ->append('month_paid');
+            ->find($id);
 
         $student->groups()->get()->map(function (Group $group) {
             $group->append('month_revenue');

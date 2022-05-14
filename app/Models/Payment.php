@@ -36,6 +36,11 @@ class Payment extends Model
         $query->where('created_at', '>', now()->subMonth());
     }
 
+    public function scopePreviousMonth($query)
+    {
+        $query->whereBetween('created_at', [now()->subMonths(2) ,now()->subMonth()]);
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class, 'student_id', 'id');
