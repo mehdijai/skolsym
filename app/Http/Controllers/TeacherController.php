@@ -19,7 +19,7 @@ class TeacherController extends Controller
 
     public function __construct()
     {
-        $this->model = Teacher::class;
+        $this->model = new Teacher();
     }
 
     public function index()

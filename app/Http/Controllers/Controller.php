@@ -6,7 +6,10 @@ use DateTime;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class Controller extends BaseController
 {
@@ -32,6 +35,21 @@ class Controller extends BaseController
         }
 
         $instance->save();
+
+        return redirect()->back();
+    }
+
+    public function destroy(Request $request)
+    {
+        if ($this->model == null) {
+            return redirect()->back();
+        }
+
+        $validated = Validator::make($request->all(), [
+            'id' => ['required', Rule::exists($this->model->getTable(), 'id')]
+        ])->validate();
+
+        $this->model::findOrFail($validated['id'])->delete();
 
         return redirect()->back();
     }

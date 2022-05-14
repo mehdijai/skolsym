@@ -49,6 +49,7 @@ Route::middleware([
         Route::post('/edit', [TeacherController::class, 'edit'])->name('edit');
         Route::get('/archive/{id}', [TeacherController::class, 'archive'])->name('archive');
         Route::post('/delete', [TeacherController::class, 'delete'])->name("delete");
+        Route::post('/destroy', [TeacherController::class, 'destroy'])->name("destroy");
         Route::get('/{id}', [TeacherController::class, 'view'])->name('view');
     });
 
@@ -61,6 +62,7 @@ Route::middleware([
         Route::post('/edit', [CourseController::class, 'edit'])->name('edit');
         Route::get('/archive/{id}', [CourseController::class, 'archive'])->name('archive');
         Route::post('/delete', [CourseController::class, 'delete'])->name("delete");
+        Route::post('/destroy', [CourseController::class, 'destroy'])->name("destroy");
     });
 
     // Group Routes
@@ -73,6 +75,7 @@ Route::middleware([
         Route::get('/archive/{id}', [GroupController::class, 'archive'])->name('archive');
         Route::post('/delete', [GroupController::class, 'delete'])->name("delete");
         Route::get('/{id}', [GroupController::class, 'view'])->name("view");
+        Route::post('/destroy', [GroupController::class, 'destroy'])->name("destroy");
     });
 
     // Student Routes
@@ -85,6 +88,7 @@ Route::middleware([
         Route::get('/archive/{id}', [StudentController::class, 'archive'])->name('archive');
         Route::post('/delete', [StudentController::class, 'delete'])->name("delete");
         Route::get('/{id}', [StudentController::class, 'view'])->name("view");
+        Route::post('/destroy', [StudentController::class, 'destroy'])->name("destroy");
     });
 
     // Payment Routes
@@ -96,6 +100,7 @@ Route::middleware([
         Route::post('/edit', [PaymentController::class, 'edit'])->name('edit');
         Route::post('/delete', [PaymentController::class, 'delete'])->name("delete");
         Route::post('/pay', [PaymentController::class, 'pay'])->name("pay");
+        Route::post('/destroy', [PaymentController::class, 'destroy'])->name("destroy");
     });
 
     // Accounting Routes
@@ -106,8 +111,5 @@ Route::middleware([
 });
 
 Route::get('/test', function () {
-    $teachers = Teacher::all();
-    $teachers->append('month_revenue');
-
-    dd($teachers->toArray());
+    return csrf_token();
 });

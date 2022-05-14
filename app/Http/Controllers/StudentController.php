@@ -18,7 +18,7 @@ class StudentController extends Controller
 {
     public function __construct()
     {
-        $this->model = Student::class;
+        $this->model = new Student();
     }
 
     public function index()

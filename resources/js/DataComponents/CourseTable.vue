@@ -18,6 +18,7 @@ const props = defineProps({
 });
 
 const removeCourse = ref(null);
+const perm = ref(false);
 
 const form = useForm({
   id: null,
@@ -28,6 +29,12 @@ const filteredCourses = (t) => {
   return props.courses.filter(
     (c) => c.id !== t.id && c.state == "active" && !t.archived
   );
+};
+
+const deleteCoursePerm = (t) => {
+  perm.value = true;
+  removeCourse.value = t;
+  form.id = t.id;
 };
 
 const deleteCourse = (t) => {
@@ -42,9 +49,16 @@ const cancelDeletion = () => {
 };
 
 const confirmDeletion = () => {
-  form.post(route("courses.delete"), {
-    onSuccess: () => cancelDeletion(),
-  });
+  if (perm.value == true) {
+    delete form.assign_to;
+    form.post(route("courses.destroy"), {
+      onFinish: () => cancelDeletion(),
+    });
+  } else {
+    form.post(route("courses.delete"), {
+      onFinish: () => cancelDeletion(),
+    });
+  }
 };
 </script>
 <template>
@@ -230,7 +244,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <div class="ml-3 relative">
-                    <div class="dropdown dropdown-end">
+                    <div class="dropdown dropdown-end dropdown-left">
                       <label
                         tabindex="0"
                         class="
@@ -254,6 +268,7 @@ const confirmDeletion = () => {
                           bg-base-100
                           rounded-md
                           w-52
+                          translate-y-1/2
                         "
                       >
                         <li>
@@ -275,7 +290,7 @@ const confirmDeletion = () => {
                               <span class="material-icons text-gray-400 text-xs"
                                 >delete</span
                               >
-                              <span class="ml-2">Delete</span>
+                              <span class="ml-2">Remove</span>
                             </span>
                           </p>
                         </li>
@@ -298,22 +313,6 @@ const confirmDeletion = () => {
                         <li>
                           <Link
                             :href="
-                              route('groups.index', {
-                                search: 'course:' + course.id,
-                              })
-                            "
-                          >
-                            <span class="flex items-center">
-                              <span class="material-icons text-gray-400 text-xs"
-                                >list</span
-                              >
-                              <span class="ml-2">Groups</span>
-                            </span>
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            :href="
                               route('groups.create', { course: course.id })
                             "
                           >
@@ -324,6 +323,16 @@ const confirmDeletion = () => {
                               <span class="ml-2">Add group</span>
                             </span>
                           </Link>
+                        </li>
+                        <li class="bg-red-100 hover:bg-red-200">
+                          <p @click="deleteCoursePerm(course)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-red-600 text-xs"
+                                >delete_forever</span
+                              >
+                              <span class="ml-2">Delete permanently</span>
+                            </span>
+                          </p>
                         </li>
                       </ul>
                     </div>

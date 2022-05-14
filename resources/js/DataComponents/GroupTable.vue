@@ -14,6 +14,12 @@ const props = defineProps({
 });
 
 const removeGroup = ref(null);
+const perm = ref(false);
+
+const form = useForm({
+  id: null,
+  assign_to: null,
+});
 
 const filteredGroups = (t) => {
   return props.groups.filter(
@@ -21,10 +27,11 @@ const filteredGroups = (t) => {
   );
 };
 
-const form = useForm({
-  id: null,
-  assign_to: null,
-});
+const deleteGroupPerm = (t) => {
+  perm.value = true;
+  removeGroup.value = t;
+  form.id = t.id;
+};
 
 const deleteGroup = (t) => {
   removeGroup.value = t;
@@ -38,9 +45,16 @@ const cancelDeletion = () => {
 };
 
 const confirmDeletion = () => {
-  form.post(route("groups.delete"), {
-    onSuccess: () => cancelDeletion(),
-  });
+  if (perm.value == true) {
+    delete form.assign_to;
+    form.post(route("groups.destroy"), {
+      onFinish: () => cancelDeletion(),
+    });
+  } else {
+    form.post(route("groups.delete"), {
+      onFinish: () => cancelDeletion(),
+    });
+  }
 };
 </script>
 <template>
@@ -57,7 +71,7 @@ const confirmDeletion = () => {
         Are you sure you want to delete this record ?
       </p>
       <div
-        v-if="
+        v-if="!perm &&
           removeGroup.students_count > 0 &&
           filteredGroups(removeGroup).length > 0
         "
@@ -201,7 +215,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <div class="ml-3 relative">
-                    <div class="dropdown dropdown-end">
+                    <div class="dropdown dropdown-end dropdown-left">
                       <label
                         tabindex="0"
                         class="
@@ -225,6 +239,7 @@ const confirmDeletion = () => {
                           bg-base-100
                           rounded-md
                           w-52
+                          translate-y-1/2
                         "
                       >
                         <li v-if="!group.archived">
@@ -241,23 +256,6 @@ const confirmDeletion = () => {
                             </span>
                           </Link>
                         </li>
-                        <li>
-                          <Link
-                            :href="
-                              route('students.index', {
-                                search: 'groups:' + group.id,
-                              })
-                            "
-                          >
-                            <span class="flex items-center">
-                              <span class="material-icons text-gray-400 text-xs"
-                                >list</span
-                              >
-                              <span class="ml-2">Students</span>
-                            </span>
-                          </Link>
-                        </li>
-
                         <li>
                           <Link
                             :href="route('groups.update', { id: group.id })"
@@ -277,11 +275,10 @@ const confirmDeletion = () => {
                               <span class="material-icons text-gray-400 text-xs"
                                 >delete</span
                               >
-                              <span class="ml-2">Delete</span>
+                              <span class="ml-2">Remove</span>
                             </span>
                           </p>
                         </li>
-
                         <li>
                           <Link :href="route('groups.archive', group.id)">
                             <span class="flex items-center">
@@ -296,6 +293,16 @@ const confirmDeletion = () => {
                               }}</span>
                             </span>
                           </Link>
+                        </li>
+                        <li class="bg-red-100 hover:bg-red-200">
+                          <p @click="deleteGroupPerm(group)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-red-600 text-xs"
+                                >delete_forever</span
+                              >
+                              <span class="ml-2">Delete permanently</span>
+                            </span>
+                          </p>
                         </li>
                       </ul>
                     </div>

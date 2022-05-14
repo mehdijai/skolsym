@@ -17,7 +17,7 @@ class CourseController extends Controller
 {
     public function __construct()
     {
-        $this->model = Course::class;
+        $this->model = new Course();
     }
 
     public function index()

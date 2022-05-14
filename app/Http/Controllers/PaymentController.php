@@ -13,6 +13,11 @@ use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
+    public function __construct()
+    {
+        $this->model = new Payment();
+    }
+
     public function index()
     {
 

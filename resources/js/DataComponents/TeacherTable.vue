@@ -15,16 +15,22 @@ const props = defineProps({
 });
 
 const removeTeacher = ref(null);
+const perm = ref(false);
 
 const form = useForm({
   id: null,
   assign_to: null,
 });
 
+const deleteTeacherPerm = (t) => {
+  perm.value = true;
+  removeTeacher.value = t;
+  form.id = t.id;
+};
 const deleteTeacher = (t) => {
   removeTeacher.value = t;
   form.id = t.id;
-  form.assign_to = 'null';
+  form.assign_to = "null";
 };
 
 const cancelDeletion = () => {
@@ -33,9 +39,16 @@ const cancelDeletion = () => {
 };
 
 const confirmDeletion = () => {
-  form.post(route("teachers.delete"), {
-    onFinish: () => cancelDeletion(),
-  });
+  if (perm.value == true) {
+    delete form.assign_to;
+    form.post(route("teachers.destroy"), {
+      onFinish: () => cancelDeletion(),
+    });
+  } else {
+    form.post(route("teachers.delete"), {
+      onFinish: () => cancelDeletion(),
+    });
+  }
 };
 </script>
 <template>
@@ -51,7 +64,7 @@ const confirmDeletion = () => {
       <p class="text-gray-600 dark:text-gray-400 text-xs py-2 px-6">
         Are you sure you want to delete this record ?
       </p>
-      <div v-if="removeTeacher.courses_count > 0" class="px-4 border-1 rounded">
+      <div v-if="!perm && removeTeacher.courses_count > 0" class="px-4 border-1 rounded">
         <JetLabel for="assign_to" value="Assign courses to a teacher" />
         <JetSelectInput
           id="assign_to"
@@ -198,7 +211,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <div class="ml-3 relative">
-                    <div class="dropdown dropdown-end">
+                    <div class="dropdown dropdown-left dropdown-end">
                       <label
                         tabindex="0"
                         class="
@@ -221,8 +234,25 @@ const confirmDeletion = () => {
                           bg-base-100
                           rounded-md
                           w-52
+                          translate-y-1/2
                         "
                       >
+                        <li>
+                          <Link
+                            :href="
+                              route('courses.create', {
+                                teacher: teacher.id,
+                              })
+                            "
+                          >
+                            <span class="flex items-center">
+                              <span class="material-icons text-gray-400 text-xs"
+                                >add_circle</span
+                              >
+                              <span class="ml-2">Add course</span>
+                            </span>
+                          </Link>
+                        </li>
                         <li>
                           <Link
                             :href="route('teachers.update', { id: teacher.id })"
@@ -242,7 +272,7 @@ const confirmDeletion = () => {
                               <span class="material-icons text-gray-400 text-xs"
                                 >delete</span
                               >
-                              <span class="ml-2">Delete</span>
+                              <span class="ml-2">Remove</span>
                             </span>
                           </p>
                         </li>
@@ -261,37 +291,15 @@ const confirmDeletion = () => {
                             </span>
                           </Link>
                         </li>
-                        <li>
-                          <Link
-                            :href="
-                              route('courses.index', {
-                                search: 'teacher:' + teacher.id,
-                              })
-                            "
-                          >
+                        <li class="bg-red-100 hover:bg-red-200">
+                          <p @click="deleteTeacherPerm(teacher)">
                             <span class="flex items-center">
-                              <span class="material-icons text-gray-400 text-xs"
-                                >list</span
+                              <span class="material-icons text-red-600 text-xs"
+                                >delete_forever</span
                               >
-                              <span class="ml-2">Courses</span>
+                              <span class="ml-2">Delete permanently</span>
                             </span>
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            :href="
-                              route('courses.create', {
-                                teacher: teacher.id,
-                              })
-                            "
-                          >
-                            <span class="flex items-center">
-                              <span class="material-icons text-gray-400 text-xs"
-                                >add_circle</span
-                              >
-                              <span class="ml-2">Add course</span>
-                            </span>
-                          </Link>
+                          </p>
                         </li>
                       </ul>
                     </div>

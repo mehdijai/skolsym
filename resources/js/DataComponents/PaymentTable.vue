@@ -24,8 +24,44 @@ function formatDate(date) {
     padTo2Digits(date.getDate()),
   ].join("-");
 }
+
+const destroyPayment = ref(null);
+
+const deletePayment = (p) => {
+  destroyPayment.value = p;
+  destroyForm.id = p.id;
+};
+
+const cancelDeletion = () => {
+  destroyPayment.value = null;
+  destroyForm.reset();
+};
+
+const destroyForm = useForm({
+  id: null,
+});
+
+const confirmDeletion = () => {
+  destroyForm.post(route("payments.destroy"), {
+    onSuccess: () => cancelDeletion(),
+  });
+};
 </script>
 <template>
+  <RemoveCard
+    v-if="destroyPayment !== null"
+    @confirm="confirmDeletion"
+    @cancel="cancelDeletion"
+  >
+    <template #content>
+      <p class="text-gray-800 dark:text-gray-200 text-xl font-bold mt-4">
+        Remove {{ destroyPayment.ref }} - {{ destroyPayment.student.name }}
+      </p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs py-2 px-6">
+        Are you sure you want to delete this record ?
+      </p>
+    </template>
+  </RemoveCard>
   <div class="sym-container" :style="style">
     <slot name="header" />
     <table>
@@ -174,9 +210,25 @@ function formatDate(date) {
                       cursor-pointer
                       hover:bg-gray-100
                       text-xs
+                      mr-1
                     "
                   >
                     edit
+                  </span>
+                  <span
+                    @click="deletePayment(payment)"
+                    class="
+                      material-icons
+                      rounded-full
+                      p-2
+                      cursor-pointer
+                      text-red-600
+                      bg-red-100
+                      hover:bg-red-200
+                      text-xs
+                    "
+                  >
+                    delete_forever
                   </span>
                 </div>
               </td>

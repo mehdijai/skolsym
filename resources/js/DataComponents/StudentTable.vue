@@ -19,6 +19,7 @@ const props = defineProps({
 });
 
 const removeStudent = ref(null);
+let perm = false;
 
 const filteredStudents = (t) => {
   return props.students.filter(
@@ -26,7 +27,17 @@ const filteredStudents = (t) => {
   );
 };
 
+const form = useForm({
+  id: null,
+});
+
 const deleteStudent = (t) => {
+  removeStudent.value = t;
+  form.id = t.id;
+};
+
+const deleteStudentPerm = (t) => {
+  perm = true;
   removeStudent.value = t;
   form.id = t.id;
 };
@@ -36,14 +47,16 @@ const cancelDeletion = () => {
   form.reset();
 };
 
-const form = useForm({
-  id: null,
-});
-
 const confirmDeletion = () => {
-  form.post(route("students.delete"), {
-    onSuccess: () => cancelDeletion(),
-  });
+  if (perm) {
+    form.post(route("students.destroy"), {
+      onSuccess: () => cancelDeletion(),
+    });
+  } else {
+    form.post(route("students.delete"), {
+      onSuccess: () => cancelDeletion(),
+    });
+  }
 };
 
 const payForm = useForm({
@@ -299,18 +312,6 @@ onMounted(() => {
                 <div class="flex items-center">
                   <Link
                     :href="route('students.view', [student.id])"
-                    v-if="group == null"
-                    class="font-bold text-gray-900 whitespace-no-wrap"
-                  >
-                    {{ student.name }}
-                  </Link>
-                  <Link
-                    v-else
-                    :href="
-                      route('students.index', {
-                        search: 'student:' + student.id,
-                      })
-                    "
                     class="font-bold text-gray-900 whitespace-no-wrap"
                   >
                     {{ student.name }}
@@ -560,6 +561,7 @@ onMounted(() => {
                           bg-base-100
                           rounded-md
                           w-52
+                          translate-y-1/2
                         "
                       >
                         <li
@@ -604,22 +606,6 @@ onMounted(() => {
                         </li>
                         <li>
                           <Link
-                            :href="
-                              route('groups.index', {
-                                search: 'students:' + student.id,
-                              })
-                            "
-                          >
-                            <span class="flex items-center">
-                              <span class="material-icons text-gray-400 text-xs"
-                                >list</span
-                              >
-                              <span class="ml-2">Groups</span>
-                            </span>
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
                             :href="route('students.update', { id: student.id })"
                           >
                             <span class="flex items-center">
@@ -637,7 +623,7 @@ onMounted(() => {
                               <span class="material-icons text-gray-400 text-xs"
                                 >delete</span
                               >
-                              <span class="ml-2">Delete</span>
+                              <span class="ml-2">Remove</span>
                             </span>
                           </p>
                         </li>
@@ -655,6 +641,16 @@ onMounted(() => {
                               }}</span>
                             </span>
                           </Link>
+                        </li>
+                        <li class="bg-red-100 hover:bg-red-200">
+                          <p @click="deleteStudentPerm(student)">
+                            <span class="flex items-center">
+                              <span class="material-icons text-red-600 text-xs"
+                                >delete_forever</span
+                              >
+                              <span class="ml-2">Delete permanently</span>
+                            </span>
+                          </p>
                         </li>
                       </ul>
                     </div>

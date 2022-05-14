@@ -19,7 +19,7 @@ class GroupController extends Controller
 {
     public function __construct()
     {
-        $this->model = Group::class;
+        $this->model = new Group();
     }
 
     public function index()
