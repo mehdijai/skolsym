@@ -25,7 +25,7 @@ const props = defineProps({
       </Breadcrumbs>
     </template>
 
-    <div class="py-12">
+    <div class="py-4">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <GroupTable :groups="groups">
           <template #header>
