@@ -5,8 +5,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
-use App\Models\Group;
-use App\Models\Teacher;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -101,6 +100,18 @@ Route::middleware([
         Route::post('/delete', [PaymentController::class, 'delete'])->name("delete");
         Route::post('/pay', [PaymentController::class, 'pay'])->name("pay");
         Route::post('/destroy', [PaymentController::class, 'destroy'])->name("destroy");
+    });
+
+    // Users Routes
+    Route::name('users.')->prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        // Route::post('/store', [UserController::class, 'store'])->name('store');
+        // Route::get('/create', [UserController::class, 'create'])->name('create');
+        // Route::get('/update/{id}', [UserController::class, 'update'])->name('update');
+        // Route::post('/edit', [UserController::class, 'edit'])->name('edit');
+        // Route::post('/delete', [UserController::class, 'delete'])->name("delete");
+        // Route::post('/pay', [UserController::class, 'pay'])->name("pay");
+        // Route::post('/destroy', [UserController::class, 'destroy'])->name("destroy");
     });
 
     // Accounting Routes

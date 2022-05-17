@@ -1,14 +1,14 @@
 <script setup>
 import { ref } from "vue";
 import { Inertia } from "@inertiajs/inertia";
-import { Link } from "@inertiajs/inertia-vue3";
+import { Link, usePage } from "@inertiajs/inertia-vue3";
 import JetApplicationMark from "@/Jetstream/ApplicationMark.vue";
 import JetDropdown from "@/Jetstream/Dropdown.vue";
 import JetDropdownLink from "@/Jetstream/DropdownLink.vue";
 import JetNavLink from "@/Jetstream/NavLink.vue";
 import JetResponsiveNavLink from "@/Jetstream/ResponsiveNavLink.vue";
 
-const navRoutes = [
+let navRoutes = [
   {
     name: "Dashboard",
     route: "dashboard",
@@ -38,6 +38,13 @@ const navRoutes = [
     route: "accounting.index",
   },
 ];
+
+if (usePage().props.value.isAdmin == true) {
+  navRoutes.push({
+    name: "Users",
+    route: "users.index",
+  });
+}
 
 const showingNavigationDropdown = ref(false);
 

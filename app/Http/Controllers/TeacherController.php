@@ -12,6 +12,8 @@ use App\QueryFilter\Filters\TeachersFilter;
 use App\QueryFilter\Searches\TeachersSearch;
 use DateTime;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class TeacherController extends Controller
