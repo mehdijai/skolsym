@@ -64,7 +64,7 @@ const logout = () => {
 </script>
 <template>
   <div class="flex flex-col bg-white dark:bg-gray-800 shadow w-fit min-h-screen">
-    <div class="flex items-center justify-between mx-6 my-4">
+    <div class="flex items-center justify-between mx-4 my-4">
       <!-- Logo -->
       <div v-if="!collapsed" class="shrink-0 flex items-center">
         <Link :href="route('dashboard')">
@@ -99,7 +99,7 @@ const logout = () => {
         >{{ collapsed ? "navigate_next" : "navigate_before" }}</span
       >
     </div>
-    <nav class="h-full flex flex-col gap-3 my-5 px-6">
+    <nav class="h-full flex flex-col gap-3 my-5 px-4">
       <template v-for="(link, index) in navRoutes" :key="index">
         <Link
           :href="route(link.route)"
