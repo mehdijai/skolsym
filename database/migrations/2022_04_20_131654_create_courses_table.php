@@ -21,7 +21,7 @@ return new class extends Migration
             $table->float('price')->default(500.00);
             $table->float('teacher_percentage')->default(50.00);
             $table->string('payment_type')->nullable()->default('monthly');
-            $table->string('state')->default('pending');
+            $table->string('state')->default('active');
             $table->boolean('archived')->default(false);
             $table->dateTime('archived_at')->nullable();
             $table->timestamps();

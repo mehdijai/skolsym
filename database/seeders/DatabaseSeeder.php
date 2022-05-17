@@ -6,6 +6,7 @@ use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Payment;
+use App\Models\Role;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
@@ -23,12 +24,32 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
+        Role::create([
+            'id' => 1,
+            'title' => 'super admin' 
+        ]);
+
+        Role::create([
+            'id' => 2,
+            'title' => 'moderator' 
+        ]);
+
         User::create([
             'name' => "Mehdi Jai",
-            'email' => "mehdi_jai@outlook.fr",
+            'email' => "mehdi.jai.mj@gmail.com",
             'email_verified_at' => now(),
             'password' => Hash::make("123456789"),
             'remember_token' => Str::random(10),
+            'role_id' => 1
+        ]);
+
+        User::create([
+            'name' => "Karim",
+            'email' => "karim@gmail.com",
+            'email_verified_at' => now(),
+            'password' => Hash::make("123456789"),
+            'remember_token' => Str::random(10),
+            'role_id' => 2
         ]);
 
         $teacher = Teacher::create([
