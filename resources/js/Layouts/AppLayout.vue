@@ -3,6 +3,7 @@ import { onMounted } from "vue";
 import { Head } from "@inertiajs/inertia-vue3";
 import JetBanner from "@/Jetstream/Banner.vue";
 import NavBar from "@/Jetstream/NavBar.vue";
+import SideBar from "../Jetstream/SideBar.vue";
 
 defineProps({
   title: String,
@@ -24,20 +25,22 @@ onMounted(() => {
 
     <JetBanner />
 
-    <div class="min-h-screen h-full bg-gray-100">
-      <NavBar />
+    <div class="min-h-screen h-full bg-gray-100 flex flex-column">
+      <SideBar />
 
-      <!-- Page Heading -->
-      <header v-if="$slots.header" class="bg-white shadow">
-        <div class="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
-          <slot name="header" />
-        </div>
-      </header>
+      <div class="w-full">
+        <!-- Page Heading -->
+        <header v-if="$slots.header" class="bg-white shadow">
+          <div class="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
+            <slot name="header" />
+          </div>
+        </header>
 
-      <!-- Page Content -->
-      <main>
-        <slot />
-      </main>
+        <!-- Page Content -->
+        <main>
+          <slot />
+        </main>
+      </div>
     </div>
   </div>
 </template>
