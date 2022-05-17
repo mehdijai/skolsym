@@ -46,11 +46,22 @@ class Controller extends BaseController
         }
 
         $validated = Validator::make($request->all(), [
-            'id' => ['required', Rule::exists($this->model->getTable(), 'id')]
+            'id' => ['required', Rule::exists($this->model->getTable(), 'id')],
         ])->validate();
 
         $this->model::findOrFail($validated['id'])->delete();
 
         return redirect()->back();
+    }
+
+    public function httpReferRouteName($request)
+    {
+        $parts = explode('/', $request->server('HTTP_REFERER'));
+
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        return $parts[count($parts) - 2] . '.' . $parts[count($parts) - 1];
     }
 }
