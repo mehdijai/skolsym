@@ -202,7 +202,8 @@ const confirmDeletion = () => {
               </td>
               <td>
                 <div class="flex items-center">
-                  <span
+                  <Link
+                    :href="route('payments.update', [payment.id])"
                     class="
                       material-icons
                       rounded-full
@@ -214,7 +215,7 @@ const confirmDeletion = () => {
                     "
                   >
                     edit
-                  </span>
+                  </Link>
                   <span
                     @click="deletePayment(payment)"
                     class="

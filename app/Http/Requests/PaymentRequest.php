@@ -31,6 +31,7 @@ class PaymentRequest extends FormRequest
                 return [
                     'student_id' => 'required|numeric|exists:students,id',
                     'courses' => 'required|array',
+                    'state' => ['sometimes', 'nullable', Rule::in(StateLists::PAYMENT)]
                 ];
             case "payments.pay":
                 return [
@@ -40,7 +41,11 @@ class PaymentRequest extends FormRequest
                 ];
             case "payments.edit":
                 return [
-                    
+                    'id' => 'required|numeric|exists:payments,id',
+                    'student_id' => 'required|numeric|exists:students,id',
+                    'course_id' => 'required|numeric|exists:courses,id',
+                    'state' => ['sometimes', 'nullable', Rule::in(StateLists::PAYMENT)],
+                    'archived' => 'sometimes|boolean',
                 ];
             case "payments.delete":
                 return [

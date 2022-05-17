@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Const\StateLists;
 use App\Http\Requests\PaymentRequest;
+use App\Models\Course;
 use App\Models\Payment;
+use App\Models\Student;
 use App\QueryFilter\Filters\PaymentsFilter;
 use App\QueryFilter\Searches\PaymentsSearch;
-use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -41,12 +43,20 @@ class PaymentController extends Controller
 
     public function create()
     {
+        $students = Student::where('state', '!=', 'removed')->where('archived', false)->get();
 
+        $students->map(function (Student $student) {
+            $student->courses = $student->groups()->with('course.teacher')->get()->pluck('course')->toArray();
+        });
+
+        return Inertia::render('Payment/Create', [
+            'students' => $students,
+            'states' => StateLists::PAYMENT,
+        ]);
     }
 
     public function store(PaymentRequest $request)
     {
-
         $validated = $request->validated();
 
         foreach ($validated['courses'] as $course) {
@@ -55,9 +65,13 @@ class PaymentController extends Controller
                 'course_id' => $course['id'],
                 'amount_payed' => $course['price'],
                 'teacher_part' => $course['price'] * $course['teacher_percentage'],
-                'state' => StateLists::PAYMENT['PAID'],
+                'state' => $validated['state'],
                 'paid_at' => now(),
             ]);
+        }
+
+        if ($this->httpReferRouteName($request) == 'payments.create') {
+            return redirect()->route('payments.index');
         }
 
         return redirect()->back();
@@ -65,12 +79,47 @@ class PaymentController extends Controller
 
     public function update($id)
     {
+        $students = Student::where('state', '!=', 'removed')->where('archived', false)->get();
 
+        $students->map(function (Student $student) {
+            $student->courses = $student->groups()->with('course.teacher')->get()->pluck('course')->toArray();
+        });
+
+        return Inertia::render('Payment/Create', [
+            'students' => $students,
+            'payment' => Payment::with('student', 'course')->findOrFail($id),
+            'states' => StateLists::PAYMENT,
+        ]);
     }
 
-    public function edit(Request $request)
+    public function edit(PaymentRequest $request)
     {
 
+        $validated = $request->validated();
+
+        $payment = Payment::findOrFail($validated['id']);
+
+        $payment->student_id = $validated['student_id'];
+        $payment->state = $validated['state'];
+
+        if ($payment->course_id != $validated['course_id']) {
+            $course = Course::findOrFail($validated['course_id']);
+            $payment->course_id = $course->id;
+            $payment->amount_payed = $course->price;
+            $payment->teacher_part = $course->price * $course->teacher_percentage;
+
+            if ($validated['state'] == StateLists::PAYMENT['PAID'] && $payment->stat != StateLists::PAYMENT['PAID']) {
+                $payment->paid_at = now();
+            }
+        }
+
+        $payment->save();
+
+        if (str_contains($this->httpReferRouteName($request), 'payments.update')) {
+            return redirect()->route('payments.index');
+        }
+
+        return redirect()->back();
     }
 
     public function delete($id)

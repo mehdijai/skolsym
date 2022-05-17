@@ -1,9 +1,15 @@
 <script setup>
 import { Link } from "@inertiajs/inertia-vue3";
 import { ref, watch, watchEffect } from "@vue/runtime-core";
+import { getCurrentInstance} from 'vue'
+const { emit } = getCurrentInstance()
 
 const props = defineProps({
   students: {
+    type: Object,
+    default: null,
+  },
+  groups: {
     type: Object,
     default: null,
   },
@@ -11,11 +17,21 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  onlyOne: {
+    type: [Number, null],
+    default: null,
+  },
 });
 
+const checkedCourse = ref(props.onlyOne);
+
+watch(checkedCourse, () => {
+  emit('checked', checkedCourse.value)
+})
+
 const isAllChecked = () => {
-  if (props.courses != null) {
-    return props.courses.every(
+  if (props.groups != null) {
+    return props.groups.every(
       (c) => c.checked == true && c.groups.every((g) => g.checked == true)
     );
   }
@@ -24,26 +40,33 @@ const isAllChecked = () => {
     return props.students.every((s) => s.checked == true);
   }
 
+  if (props.courses != null) {
+    return props.courses.every((s) => s.checked == true);
+  }
+
   return false;
 };
 
 const allChecked = ref(isAllChecked());
 
 watchEffect(() => {
-  if (props.courses != null) {
-    allChecked.value = props.courses.every(
+  if (props.groups != null) {
+    allChecked.value = props.groups.every(
       (c) => c.checked == true && c.groups.every((g) => g.checked == true)
     );
   }
   if (props.students != null) {
     allChecked.value = props.students.every((s) => s.checked == true);
   }
+  if (props.courses != null) {
+    allChecked.value = props.courses.every((s) => s.checked == true);
+  }
 });
 
 watch(allChecked, () => {
   if (allChecked.value == true) {
-    if (props.courses != null) {
-      props.courses.map((c) => {
+    if (props.groups != null) {
+      props.groups.map((c) => {
         if (c.groups.length > 0) {
           c.checked = true;
           c.groups.map((g) => {
@@ -61,9 +84,15 @@ watch(allChecked, () => {
         return s;
       });
     }
-  } else {
     if (props.courses != null) {
-      props.courses.map((c) => {
+      props.courses.map((s) => {
+        s.checked = true;
+        return s;
+      });
+    }
+  } else {
+    if (props.groups != null) {
+      props.groups.map((c) => {
         if (c.groups.length > 0) {
           c.checked = false;
           c.groups.map((g) => {
@@ -81,20 +110,14 @@ watch(allChecked, () => {
         return s;
       });
     }
+    if (props.courses != null) {
+      props.courses.map((s) => {
+        s.checked = false;
+        return s;
+      });
+    }
   }
 });
-
-// if (props.courses != null) {
-//   watch(props.courses, () => {
-//     console.log(props.courses);
-//     props.courses.map((c) => {
-//       if (c.groups.find((g) => g.checked === true) === undefined) {
-//         c.checked = false;
-//       }
-//       return c;
-//     });
-//   });
-// }
 </script>
 <template>
   <div class="overflow-x-auto w-full">
@@ -103,7 +126,7 @@ watch(allChecked, () => {
       <thead>
         <tr>
           <th>
-            <label>
+            <label v-if="onlyOne == null">
               <input
                 v-model="allChecked"
                 value="allChecked"
@@ -117,6 +140,10 @@ watch(allChecked, () => {
             <th>Email</th>
           </template>
           <template v-if="courses != null">
+            <th>Title</th>
+            <th>Teacher</th>
+          </template>
+          <template v-if="groups != null">
             <th>Title</th>
             <th>Teacher</th>
           </template>
@@ -155,6 +182,48 @@ watch(allChecked, () => {
         </template>
         <template v-if="courses != null">
           <template v-for="(course, index) in courses" :key="index">
+            <tr>
+              <th>
+                <label>
+                  <input
+                    v-if="onlyOne != null"
+                    v-model="checkedCourse"
+                    :value="course.id"
+                    type="radio"
+                    class="radio"
+                    name="courseRadio"
+                  />
+                  <input
+                    v-else
+                    v-model="course.checked"
+                    :value="course.checked"
+                    type="checkbox"
+                    class="checkbox"
+                  />
+                </label>
+              </th>
+              <td>
+                <Link
+                  :href="
+                    route('courses.index', { search: 'course:' + course.id })
+                  "
+                  class="font-bold"
+                  >{{ course.title }}</Link
+                >
+              </td>
+              <td>
+                <Link
+                  :href="route('teachers.view', [course.teacher_id])"
+                  class="link"
+                >
+                  {{ course.teacher.name }}
+                </Link>
+              </td>
+            </tr>
+          </template>
+        </template>
+        <template v-if="groups != null">
+          <template v-for="(course, index) in groups" :key="index">
             <tr>
               <th :class="course.groups.length == 0 ? 'bg-red-100' : ''">
                 <label>
