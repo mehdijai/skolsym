@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Const\SkolFaker;
 use App\Const\StateLists;
 use App\Models\Course;
 use App\Models\Group;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
+    use SkolFaker;
     /**
      * Seed the application's database.
      *
@@ -24,14 +26,61 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
+        $this->createAuthUsers();
+        $teachers = Teacher::factory(5)->create();
+        $students = Student::factory(20)->create();
+
+        foreach ($teachers as $teacher) {
+            $courses = Course::factory(5)->create([
+                'teacher_id' => $teacher->id,
+            ]);
+
+            foreach ($courses as $course) {
+                $groups = Group::factory(2)->create([
+                    'title' => $this->group($course->title),
+                    'course_id' => $course->id,
+                ]);
+
+                foreach ($groups as $group) {
+                    $group->students()->attach(collect($students)->random(5)->map(fn($student) => $student->id));
+                }
+            }
+        }
+
+    }
+
+    public function generatePayments()
+    {
+        $students = Student::all();
+
+        foreach ($students as $student) {
+
+            $courses = $student->groups()->with('course')->get()->pluck('course')->toArray();
+
+            $key = array_rand($courses);
+            $course = $courses[$key];
+
+            Payment::create([
+                'student_id' => $student->id,
+                'course_id' => $course['id'],
+                'amount_payed' => $course['price'],
+                'teacher_part' => $course['price'] * $course['teacher_percentage'],
+                'state' => StateLists::PAYMENT['PENDING'],
+                'paid_at' => now(),
+            ]);
+        }
+    }
+
+    public function createAuthUsers()
+    {
         Role::create([
             'id' => 1,
-            'title' => 'super admin' 
+            'title' => 'super admin',
         ]);
 
         Role::create([
             'id' => 2,
-            'title' => 'moderator' 
+            'title' => 'moderator',
         ]);
 
         User::create([
@@ -40,7 +89,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make("123456789"),
             'remember_token' => Str::random(10),
-            'role_id' => 1
+            'role_id' => 1,
         ]);
 
         User::create([
@@ -49,44 +98,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make("123456789"),
             'remember_token' => Str::random(10),
-            'role_id' => 2
-        ]);
-
-        $teacher = Teacher::create([
-            'name' => 'Nour Homsi',
-            'email' => 'nour.homsi@gmail.com',
-            'phone' => '07896325',
-        ]);
-
-        $course = Course::create([
-            'title' => 'Web development',
-            'teacher_id' => $teacher->id,
-            'teacher_percentage' => 0.3,
-            'price' => 500,
-        ]);
-
-        $group = Group::create([
-            'title' => 'WD_GPA',
-            'course_id' => $course->id,
-        ]);
-
-        $student = Student::create([
-            'name' => 'Hossam Jai',
-            'email' => 'hossam.jai@gmail.com',
-            'phone' => '0612113830',
-            'age' => 23,
-            'grade' => 'bac+3',
-        ]);
-
-        $student->groups()->attach($group->id);
-
-        $payment = Payment::create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'amount_payed' => $course->price,
-            'teacher_part' => $course->price * $course->teacher_percentage,
-            'state' => StateLists::PAYMENT['PAID'],
-            'paid_at' => now(),
+            'role_id' => 2,
         ]);
     }
 }
