@@ -11,7 +11,13 @@ class RefGenerator
         $val = dechex($timestamp + random_int(0, 9));
         $val = hexdec($val);
         $val = dechex($val + random_int(0, 9));
-        return strtoupper($val);
+        $ref = strtoupper($val);
+
+        if (self::exists($ref)) {
+            $ref = self::generate();
+        }
+
+        return $ref;
     }
 
     public static function exists($uuid)
