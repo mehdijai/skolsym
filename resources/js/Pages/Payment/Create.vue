@@ -119,7 +119,7 @@ const submit = () => {
                     <option :value="0">None</option>
                     <template v-for="(student, index) in students" :key="index">
                       <option class="capitalize" :value="student.id">
-                        {{ student.name }} ({{ student.age }})
+                        {{ student.name }} ({{ student.age }} Y.O)
                       </option>
                     </template>
                   </template>
