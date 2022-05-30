@@ -65,7 +65,7 @@ class PaymentController extends Controller
                 'course_id' => $course['id'],
                 'amount_payed' => $course['price'],
                 'teacher_part' => $course['price'] * $course['teacher_percentage'],
-                'state' => $validated['state'],
+                'state' => $validated['state'] ?? StateLists::PAYMENT['PAID'],
                 'paid_at' => now(),
             ]);
         }
