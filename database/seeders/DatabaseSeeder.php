@@ -27,25 +27,25 @@ class DatabaseSeeder extends Seeder
     {
 
         $this->createAuthUsers();
-        $teachers = Teacher::factory(5)->create();
-        $students = Student::factory(20)->create();
+        $teachers = Teacher::factory(2)->create();
+        $students = Student::factory(5)->create();
+        $courses = [];
 
         foreach ($teachers as $teacher) {
-            $courses = Course::factory(5)->create([
+            $courses = array_merge($courses, [...Course::factory(2)->create([
                 'teacher_id' => $teacher->id,
-            ]);
-
-            foreach ($courses as $course) {
-                $groups = Group::factory(2)->create([
-                    'title' => $this->group($course->title),
-                    'course_id' => $course->id,
-                ]);
-
-                foreach ($groups as $group) {
-                    $group->students()->attach(collect($students)->random(5)->map(fn($student) => $student->id));
-                }
-            }
+            ])->toArray()]);
         }
+
+        foreach ($courses as $course) {
+            $groups = Group::factory(1)->create([
+                'title' => $this->group($course['title']),
+                'course_id' => $course['id'],
+            ]);
+        }
+        // foreach ($groups as $group) {
+        //     $group->students()->attach(collect($students)->random(5)->map(fn($student) => $student->id));
+        // }
 
     }
 
