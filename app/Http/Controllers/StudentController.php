@@ -28,8 +28,11 @@ class StudentController extends Controller
                 'payments' => function ($q) {
                     $q->currentMonth()->latest();
                 },
-                'groups.course.payments' => function ($q) {
+                'groups.payments' => function ($q) {
                     $q->currentMonth()->latest();
+                },
+                'groups.course.teacher' => function ($q) {
+                    
                 }
             ]);
 

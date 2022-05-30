@@ -40,8 +40,8 @@ const form = useForm({
 const selectedCourse = ref(edit.value ? props.payment.course_id : 0);
 
 const setCourse = (id) => {
-  selectedCourse.value = id
-}
+  selectedCourse.value = id;
+};
 
 const AttachedCourses = computed(() =>
   props.students.find((s) => s.id == form.student_id) != undefined
@@ -56,7 +56,7 @@ const AttachedCourses = computed(() =>
 
 const submit = () => {
   if (edit.value === true) {
-    form.course_id = selectedCourse.value
+    form.course_id = selectedCourse.value;
     form.post(route("payments.edit"));
   } else {
     form.courses = AttachedCourses.value.filter((s) => s.checked === true);
@@ -173,10 +173,7 @@ const submit = () => {
               </JetButtonSecondary>
               <JetButton
                 :class="{ 'opacity-25': form.processing }"
-                :disabled="
-                  form.processing ||
-                  form.student_id == 0
-                "
+                :disabled="form.processing || form.student_id == 0"
               >
                 {{ edit ? "Update" : "Create" }}
               </JetButton>
@@ -194,7 +191,11 @@ const submit = () => {
             sm:rounded-lg
           "
         >
-          <DataSelector @checked="setCourse" :onlyOne="edit ? selectedCourse : null" :courses="AttachedCourses" />
+          <DataSelector
+            @checked="setCourse"
+            :onlyOne="edit ? selectedCourse : null"
+            :courses="AttachedCourses"
+          />
         </div>
       </div>
     </div>

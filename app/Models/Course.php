@@ -70,9 +70,4 @@ class Course extends Model
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
     }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class, 'course_id', 'id');
-    }
 }

@@ -23,7 +23,7 @@ class PaymentController extends Controller
     public function index()
     {
 
-        $query = Payment::query()->with('course.teacher', 'student');
+        $query = Payment::query()->with('group.course.teacher', 'student');
 
         $payments = app(Pipeline::class)
             ->send($query)

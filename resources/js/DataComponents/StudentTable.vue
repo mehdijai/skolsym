@@ -467,10 +467,10 @@ onMounted(() => {
                           :href="
                             route('students.index', {
                               filter:
-                                group.course.payments.find(
+                                group.payments.find(
                                   (p) => p.student_id == student.id
                                 ) != undefined
-                                  ? group.course.payments.find(
+                                  ? group.payments.find(
                                       (p) => p.student_id == student.id
                                     ).state
                                   : 'pending',
@@ -479,10 +479,10 @@ onMounted(() => {
                         >
                           <TagPill
                             :value="
-                              group.course.payments.find(
+                              group.payments.find(
                                 (p) => p.student_id == student.id
                               ) != undefined
-                                ? group.course.payments.find(
+                                ? group.payments.find(
                                     (p) => p.student_id == student.id
                                   ).state
                                 : 'pending'

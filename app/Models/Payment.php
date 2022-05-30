@@ -14,7 +14,7 @@ class Payment extends Model
     protected $table = "payments";
     protected $fillable = [
         'student_id',
-        'course_id',
+        'group_id',
         'amount_payed',
         'teacher_part',
         'state',
@@ -36,8 +36,8 @@ class Payment extends Model
         return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
-    public function course()
+    public function group()
     {
-        return $this->belongsTo(Course::class, 'course_id', 'id');
+        return $this->belongsTo(Group::class, 'group_id', 'id');
     }
 }

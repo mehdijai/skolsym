@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $teachers = Teacher::factory(2)->create();
         $students = Student::factory(5)->create();
         $courses = [];
+        $groups = [];
 
         foreach ($teachers as $teacher) {
             $courses = array_merge($courses, [...Course::factory(2)->create([
@@ -38,14 +39,14 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach ($courses as $course) {
-            $groups = Group::factory(1)->create([
+            $groups = array_merge($groups, [...Group::factory(1)->create([
                 'title' => $this->group($course['title']),
                 'course_id' => $course['id'],
-            ]);
+            ])]);
         }
-        // foreach ($groups as $group) {
-        //     $group->students()->attach(collect($students)->random(5)->map(fn($student) => $student->id));
-        // }
+        foreach ($groups as $group) {
+            $group->students()->attach(collect($students)->random(3)->map(fn($student) => $student->id));
+        }
 
     }
 

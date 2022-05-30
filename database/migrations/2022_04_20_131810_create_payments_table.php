@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('ref')->unique();
             $table->foreignId('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->foreignId('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreignId('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->float('amount_payed');
             $table->float('teacher_part');
             $table->string('state')->default('pending');

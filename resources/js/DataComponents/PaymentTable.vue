@@ -69,13 +69,13 @@ const confirmDeletion = () => {
         <tr>
           <th scope="col">Ref</th>
           <th scope="col">Student</th>
+          <th scope="col">Group</th>
           <th scope="col">Course</th>
           <th scope="col">Teacher</th>
           <th scope="col">Paid $</th>
           <th scope="col">Teacher $</th>
-          <th scope="col">Created at</th>
           <th scope="col">Paid at</th>
-          <th scope="col">Payment Type</th>
+          <th scope="col">Type</th>
           <th scope="col">State</th>
           <th scope="col">Actions</th>
         </tr>
@@ -112,24 +112,36 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <Link
-                    :href="
-                      route('courses.index', {
-                        search: 'course:' + payment.course.id,
-                      })
-                    "
+                    :href="route('groups.view', [payment.group.id])"
                     class="link"
                   >
-                    {{ payment.course.title }}
+                    {{ payment.group.title }}
                   </Link>
                 </div>
               </td>
               <td>
                 <div class="flex items-center">
                   <Link
-                    :href="route('teachers.view', [payment.course.teacher_id])"
+                    :href="
+                      route('courses.index', {
+                        search: 'course:' + payment.group.course.id,
+                      })
+                    "
                     class="link"
                   >
-                    {{ payment.course.teacher.name }}
+                    {{ payment.group.course.title }}
+                  </Link>
+                </div>
+              </td>
+              <td>
+                <div class="flex items-center">
+                  <Link
+                    :href="
+                      route('teachers.view', [payment.group.course.teacher_id])
+                    "
+                    class="link"
+                  >
+                    {{ payment.group.course.teacher.name }}
                   </Link>
                 </div>
               </td>
@@ -144,15 +156,9 @@ const confirmDeletion = () => {
                 <div class="flex items-center">
                   <p class="font-bold text-orange-500">
                     {{
-                      payment.course.teacher_percentage * payment.amount_payed
+                      payment.group.course.teacher_percentage *
+                      payment.amount_payed
                     }}
-                  </p>
-                </div>
-              </td>
-              <td>
-                <div class="flex items-center">
-                  <p>
-                    {{ formatDate(new Date(payment.created_at)) }}
                   </p>
                 </div>
               </td>
@@ -166,7 +172,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <p class="capitalize whitespace-no-wrap">
-                    {{ payment.course.payment_type }}
+                    {{ payment.group.course.payment_type }}
                   </p>
                 </div>
               </td>

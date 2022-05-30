@@ -9,14 +9,15 @@ class PaymentsSearch extends Search
     protected function applySearch($builder)
     {
         $search = request('search');
-        $allowed = ['course.teacher', 'student', 'course.groups'];
+        $allowed = ['group', 'group.course', 'group.course.teacher', 'student'];
 
         if (strpos(request('search'), ':') !== false) {
             $builder = $this->applySearchRelation($builder, $allowed, "payment");
         } else {
             $builder->where(function ($query) use ($search) {
-                $query->whereRelation('course', 'title', 'LIKE', "%{$search}%")
-                    ->orWhereRelation('course.teacher', 'name', 'LIKE', "%{$search}%")
+                $query->whereRelation('group', 'title', 'LIKE', "%{$search}%")
+                    ->orWhereRelation('group.course', 'title', 'LIKE', "%{$search}%")
+                    ->orWhereRelation('group.course.teacher', 'name', 'LIKE', "%{$search}%")
                     ->orWhereRelation('student', 'name', 'LIKE', "%{$search}%")
                     ->orWhere('ref', 'LIKE', "%{$search}%")
                     ->orWhere('amount_payed', 'LIKE', "%{$search}%")
