@@ -102,11 +102,7 @@ const confirmDeletion = () => {
               <td>
                 <div class="flex items-center">
                   <Link
-                    :href="
-                      route('students.index', {
-                        search: 'student:' + payment.student.id,
-                      })
-                    "
+                    :href="route('students.view', [payment.student.id])"
                     class="link"
                   >
                     {{ payment.student.name }}
