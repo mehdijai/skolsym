@@ -1,15 +1,17 @@
 <?php
 namespace App\Const;
 
+use Illuminate\Database\Eloquent\Builder;
+
 trait MonthRelativeTrait
 {
-    public function scopeCurrentMonth($query)
+    public function scopeCurrentMonth(Builder $query)
     {
-        $query->where('created_at', '>', now()->subMonth());
+        $query->whereBetween('created_at', [now()->firstOfMonth(), now()->lastOfMonth()]);
     }
 
-    public function scopePreviousMonth($query)
+    public function scopePreviousMonth(Builder $query)
     {
-        $query->whereBetween('created_at', [now()->subMonths(2), now()->subMonth()]);
+        $query->whereBetween('created_at', [now()->subMonths(2)->firstOfMonth(), now()->subMonths(2)->lastOfMonth()]);
     }
 }
