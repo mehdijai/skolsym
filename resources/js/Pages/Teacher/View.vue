@@ -16,7 +16,6 @@ import StudentTable from "@/DataComponents/StudentTable.vue";
 import TagPill from "@/Jetstream/TagPill.vue";
 import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
-import Dropdown from "../../../../vendor/laravel/jetstream/stubs/inertia/resources/js/Jetstream/Dropdown.vue";
 
 const props = defineProps({
   teacher: Object,

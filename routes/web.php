@@ -103,7 +103,7 @@ Route::middleware([
     });
 
     // Users Routes
-    Route::name('users.')->prefix('users')->group(function () {
+    Route::name('users.')->prefix('users')->middleware("can:manage-users")->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         // Route::post('/store', [UserController::class, 'store'])->name('store');
         // Route::get('/create', [UserController::class, 'create'])->name('create');

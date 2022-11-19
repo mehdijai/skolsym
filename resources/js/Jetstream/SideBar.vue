@@ -3,8 +3,6 @@ import JetApplicationMark from "@/Jetstream/ApplicationMark.vue";
 import { Inertia } from "@inertiajs/inertia";
 import { Link, usePage } from "@inertiajs/inertia-vue3";
 import { ref } from "@vue/reactivity";
-import DropdownLink from "../../../vendor/laravel/jetstream/stubs/inertia/resources/js/Jetstream/DropdownLink.vue";
-import Dropdown from "../../../vendor/laravel/jetstream/stubs/inertia/resources/js/Jetstream/Dropdown.vue";
 
 let navRoutes = [
   {
@@ -43,8 +41,8 @@ let navRoutes = [
     icon: "account_balance_wallet",
   },
 ];
-
-if (usePage().props.value.isAdmin == true) {
+console.log(usePage().props.value);
+if (usePage().props.value["manage-users"] == true) {
   navRoutes.push({
     name: "Users",
     route: "users.index",

@@ -7,15 +7,9 @@ use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        if (!Gate::allows('isAdmin')) {
-            abort(403);
-        }
-    }
     public function index()
     {
-
+        return "user";
     }
     public function create()
     {
